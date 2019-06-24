@@ -1,0 +1,7 @@
+apiVersion: logging.pf9.io/v1alpha1
+kind: Source
+metadata:
+  name: example-source
+spec:
+  # Add fields here
+  size: 3
