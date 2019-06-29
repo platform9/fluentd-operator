@@ -82,10 +82,6 @@ type metadata struct {
 	files             []string
 	typesSizes        types.Sizes
 	parents, children map[packageID]bool
-
-	// missingImports is the set of unresolved imports for this package.
-	// It contains any packages with `go list` errors.
-	missingImports map[packagePath]struct{}
 }
 
 type packageCache struct {
@@ -116,9 +112,8 @@ func (v *view) Folder() span.URI {
 // Config returns the configuration used for the view's interaction with the
 // go/packages API. It is shared across all views.
 func (v *view) buildConfig() *packages.Config {
-	//TODO:should we cache the config and/or overlay somewhere?
+	// TODO: Should we cache the config and/or overlay somewhere?
 	return &packages.Config{
-		Context:    v.backgroundCtx,
 		Dir:        v.folder.Filename(),
 		Env:        v.env,
 		BuildFlags: v.buildFlags,
@@ -247,8 +242,10 @@ func (f *goFile) invalidateAST() {
 	f.token = nil
 
 	// Remove the package and all of its reverse dependencies from the cache.
-	if f.pkg != nil {
-		f.view.remove(f.pkg.id, map[packageID]struct{}{})
+	for id, pkg := range f.pkgs {
+		if pkg != nil {
+			f.view.remove(id, map[packageID]struct{}{})
+		}
 	}
 }
 
@@ -281,7 +278,7 @@ func (v *view) remove(id packageID, seen map[packageID]struct{}) {
 	for _, filename := range m.files {
 		if f, _ := v.findFile(span.FileURI(filename)); f != nil {
 			if gof, ok := f.(*goFile); ok {
-				gof.pkg = nil
+				delete(gof.pkgs, id)
 			}
 		}
 	}
@@ -305,10 +302,6 @@ func (v *view) GetFile(ctx context.Context, uri span.URI) (source.File, error) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 
-	if ctx.Err() != nil {
-		return nil, ctx.Err()
-	}
-
 	return v.getFile(uri)
 }
 
@@ -327,6 +320,7 @@ func (v *view) getFile(uri span.URI) (viewFile, error) {
 			fileBase: fileBase{
 				view:  v,
 				fname: filename,
+				kind:  source.Mod,
 			},
 		}
 	case ".sum":
@@ -334,6 +328,7 @@ func (v *view) getFile(uri span.URI) (viewFile, error) {
 			fileBase: fileBase{
 				view:  v,
 				fname: filename,
+				kind:  source.Sum,
 			},
 		}
 	default:
@@ -342,6 +337,7 @@ func (v *view) getFile(uri span.URI) (viewFile, error) {
 			fileBase: fileBase{
 				view:  v,
 				fname: filename,
+				kind:  source.Go,
 			},
 		}
 		v.session.filesWatchMap.Watch(uri, func() {

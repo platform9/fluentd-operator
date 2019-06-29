@@ -178,6 +178,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:cfc5b2c22306eb2edbdce2850686525aa037415d7b67bf1293db0dbd013d5723"
+  name = "github.com/goph/emperror"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "ae59d9fdc3f0c4814bc5fac2d4a68441dcff5a17"
+  version = "v0.17.1"
+
+[[projects]]
   branch = "master"
   digest = "1:bb7bd892abcb75ef819ce2efab9d54d22b7e38dc05ffac55428bb0578b52912b"
   name = "github.com/gregjones/httpcache"
@@ -225,7 +233,7 @@
     "jwriter",
   ]
   pruneopts = "NT"
-  revision = "da37f6c1e4819c2ed4be6542856f9c0f0560348d"
+  revision = "b2ccc519800e761ac8000b95e5d57c80a897ff9e"
 
 [[projects]]
   branch = "master"
@@ -253,7 +261,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ce4eb83561916e4d239309a715284937ea1ece5282b017b8e2ce35335d313587"
+  digest = "1:47206e7630ed0f7fb37b6655dfd7da0be1c28b591694251278561b57846ad131"
   name = "github.com/operator-framework/operator-sdk"
   packages = [
     "pkg/k8sutil",
@@ -262,7 +270,7 @@
     "version",
   ]
   pruneopts = "NT"
-  revision = "915ddef70246a1dd9204a68fe6c0e0a926d2eb61"
+  revision = "61b6af18ee505567085e4c2036abb98d8c737770"
 
 [[projects]]
   digest = "1:93b1d84c5fa6d1ea52f4114c37714cddd84d5b78f151b62bb101128dd51399bf"
@@ -287,6 +295,14 @@
   pruneopts = "NT"
   revision = "0be1b92a6df0e4f5cb0a5d15fb7f643d0ad93ce6"
   version = "v3.0.0"
+
+[[projects]]
+  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "NT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:9d8420bbf131d1618bde6530af37c3799340d3762cc47210c1d9532a4c3a2779"
@@ -366,14 +382,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:67b5835da89d284ab75c6807736d8ef9fe971a41087c6b74520b10fd7577b7a1"
+  digest = "1:17e1a59f06a8afe10b1541cb8feab2694846a0f49b5805a4f8561c6f3b7b2594"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NT"
-  revision = "c5567b49c5d04a5f83870795b8c0e2df43a8ce32"
+  revision = "04f50cda93cbb67f2afa353c52f342100e80e625"
 
 [[projects]]
   digest = "1:348fa8283a7c60b5b71ce04d27b37f7c0fce552d4d0b463b5b3ebbd1840d3f1a"
@@ -411,7 +427,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b81ba4679620ad02ca2147122aa45e7a279403d87504ca899c18068139914da9"
+  digest = "1:72cc7864f6909c6a1cb670fbc26bebae36ed5648557821c67d9ea7535d777c99"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -428,7 +444,7 @@
     "internal/semver",
   ]
   pruneopts = "NT"
-  revision = "7f22187876386a0191627eacc82c8a69e6eb33d6"
+  revision = "a575db70c06744141b7a52bb6c4aff8d860588c6"
 
 [[projects]]
   digest = "1:25a3797e84a65cc761261eb04134cc03bc64861ef37d1242d92b199bd955800f"
@@ -736,16 +752,21 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/go-logr/logr",
+    "github.com/goph/emperror",
     "github.com/operator-framework/operator-sdk/pkg/k8sutil",
     "github.com/operator-framework/operator-sdk/pkg/leader",
     "github.com/operator-framework/operator-sdk/pkg/ready",
     "github.com/operator-framework/operator-sdk/version",
+    "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/conversion-gen",
