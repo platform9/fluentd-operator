@@ -1,7 +1,7 @@
 package fluentbit
 
 import (
-	"github.com/platform9/fluentd-operator/pkg/resource/fluentbit"
+	"github.com/platform9/fluentd-operator/pkg/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -21,7 +21,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new fluentbit.Reconciler
 func newReconciler(mgr manager.Manager) *fluentbit.Reconciler {
-	return fluentbit.New(mgr.GetClient(), mgr.GetScheme())
+	return fluentbit.New(mgr)
 }
 
 // add adds a new Controller to mgr

@@ -13,7 +13,6 @@ import (
 	sdkVersion "github.com/operator-framework/operator-sdk/version"
 	"github.com/platform9/fluentd-operator/pkg/apis"
 	"github.com/platform9/fluentd-operator/pkg/controller"
-	"github.com/platform9/fluentd-operator/pkg/options"
 
 	//flag "github.com/spf13/pflag"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -32,7 +31,6 @@ func printVersion() {
 }
 
 func main() {
-	options.AddFlags()
 
 	flag.Parse()
 
