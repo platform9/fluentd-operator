@@ -1,10 +1,8 @@
 package syncer
 
 import (
-	"fmt"
-	"io/ioutil"
-
 	"github.com/platform9/fluentd-operator/pkg/options"
+	"github.com/platform9/fluentd-operator/pkg/utils"
 	"github.com/presslabs/controller-util/syncer"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -71,7 +69,7 @@ func (s *fbCfgMapSyncer) SyncFn(in runtime.Object) error {
 	out := in.(*corev1.ConfigMap)
 	out.ObjectMeta.Labels = Labels
 	if len(out.Data) == 0 {
-		if d, err := getCfgMapData(); err != nil {
+		if d, err := utils.GetCfgMapData("fluent-bit"); err != nil {
 			return err
 		} else {
 			out.Data = d
@@ -203,27 +201,4 @@ func getVolumes() []corev1.Volume {
 			},
 		},
 	}
-}
-
-func getCfgMapData() (map[string]string, error) {
-	subDir := fmt.Sprintf("%s/conf/fluent-bit", *(options.CfgDir))
-	data := map[string]string{}
-	files, err := ioutil.ReadDir(subDir)
-	if err != nil {
-		return data, err
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", subDir, file.Name()))
-		if err != nil {
-			return data, err
-		}
-
-		data[file.Name()] = string(content)
-	}
-
-	return data, nil
 }
