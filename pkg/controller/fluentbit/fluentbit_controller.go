@@ -3,6 +3,7 @@ package fluentbit
 import (
 	"github.com/platform9/fluentd-operator/pkg/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -40,10 +41,12 @@ func add(mgr manager.Manager, r *fluentbit.Reconciler) error {
 		return err
 	}
 
-	return c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &appsv1.DaemonSet{},
-	})
+	if err := c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForObject{}); err != nil {
+		log.Error(err, "Error adding watch")
+		return err
+	}
+
+	return c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForObject{})
 }
 
 var _ reconcile.Reconciler = &fluentbit.Reconciler{}

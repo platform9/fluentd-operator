@@ -1,13 +1,16 @@
 package syncer
 
 import (
+	"github.com/imdario/mergo"
 	"github.com/platform9/fluentd-operator/pkg/options"
 	"github.com/platform9/fluentd-operator/pkg/utils"
+	"github.com/presslabs/controller-util/mergo/transformers"
 	"github.com/presslabs/controller-util/syncer"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -32,6 +35,10 @@ type fdCfgMapSyncer struct {
 }
 
 type fdSvcSyncer struct {
+}
+
+func getLabels() labels.Set {
+	return Labels
 }
 
 // NewFluentdSyncer returns a sync interface compliant implementation for fluentd
@@ -88,15 +95,32 @@ func NewFluentdSvcSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interfa
 // SyncFn sync the Fluentd service per spec
 func (s *fdSvcSyncer) SyncFn(in runtime.Object) error {
 	out := in.(*corev1.Service)
-	out.ObjectMeta.Labels = Labels
-	out.Spec.Selector = Labels
+	if len(out.ObjectMeta.Labels) == 0 {
+		out.ObjectMeta.Labels = map[string]string{}
+	}
+
+	if len(out.Spec.Selector) == 0 {
+		out.Spec.Selector = map[string]string{}
+	}
+	for k, v := range Labels {
+		out.ObjectMeta.Labels[k] = v
+		out.Spec.Selector[k] = v
+	}
+
 	return nil
 }
 
 // SyncFn syncs the Fluentd config map per spec
 func (s *fdCfgMapSyncer) SyncFn(in runtime.Object) error {
 	out := in.(*corev1.ConfigMap)
-	out.ObjectMeta.Labels = Labels
+	if len(out.ObjectMeta.Labels) == 0 {
+		out.ObjectMeta.Labels = map[string]string{}
+	}
+
+	for k, v := range Labels {
+		out.ObjectMeta.Labels[k] = v
+	}
+
 	if len(out.Data) == 0 {
 		if d, err := utils.GetCfgMapData("fluentd"); err != nil {
 			return err
@@ -120,17 +144,29 @@ func (s *fdSyncer) SyncFn(in runtime.Object) error {
 	var replicas int32 = 1
 	out.ObjectMeta.Labels = Labels
 	out.Spec.Replicas = &replicas // TODO: Use HPA
-	out.Spec.Selector = &metav1.LabelSelector{
-		MatchLabels: Labels,
+	out.Spec.Selector = metav1.SetAsLabelSelector(getLabels())
+
+	if len(out.Spec.Template.ObjectMeta.Annotations) == 0 {
+		out.Spec.Template.ObjectMeta.Annotations = map[string]string{}
 	}
-	out.Spec.Template.ObjectMeta.Annotations = annotations
-	out.Spec.Template.ObjectMeta.Labels = Labels
-	out.Spec.Template.Spec = *getPodSpec()
-	return nil
+
+	for k, v := range annotations {
+		out.Spec.Template.ObjectMeta.Annotations[k] = v
+	}
+
+	if len(out.Spec.Template.ObjectMeta.Labels) == 0 {
+		out.Spec.Template.ObjectMeta.Labels = map[string]string{}
+	}
+
+	for k, v := range Labels {
+		out.Spec.Template.ObjectMeta.Labels[k] = v
+	}
+
+	return mergo.Merge(&out.Spec.Template.Spec, getPodSpec(), mergo.WithTransformers(transformers.PodSpec))
 }
 
-func getPodSpec() *corev1.PodSpec {
-	return &corev1.PodSpec{
+func getPodSpec() corev1.PodSpec {
+	return corev1.PodSpec{
 		Tolerations: []corev1.Toleration{
 			{
 				Key:    "node-role.kubernetes.io/master",

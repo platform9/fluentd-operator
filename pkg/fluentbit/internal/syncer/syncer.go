@@ -1,6 +1,9 @@
 package syncer
 
 import (
+	"github.com/presslabs/controller-util/mergo/transformers"
+
+	"github.com/imdario/mergo"
 	"github.com/platform9/fluentd-operator/pkg/options"
 	"github.com/platform9/fluentd-operator/pkg/utils"
 	"github.com/presslabs/controller-util/syncer"
@@ -8,6 +11,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -78,6 +82,10 @@ func (s *fbCfgMapSyncer) SyncFn(in runtime.Object) error {
 	return nil
 }
 
+func getLabels() labels.Set {
+	return Labels
+}
+
 // SyncFn syncs the Fluentbit cluster object with operator spec
 func (s *fbSyncer) SyncFn(in runtime.Object) error {
 	annotations := map[string]string{
@@ -88,18 +96,34 @@ func (s *fbSyncer) SyncFn(in runtime.Object) error {
 
 	out := in.(*appsv1.DaemonSet)
 
-	out.ObjectMeta.Labels = Labels
-	out.Spec.Selector = &metav1.LabelSelector{
-		MatchLabels: Labels,
+	if len(out.ObjectMeta.Labels) == 0 {
+		out.ObjectMeta.Labels = map[string]string{}
 	}
-	out.Spec.Template.ObjectMeta.Annotations = annotations
-	out.Spec.Template.ObjectMeta.Labels = Labels
-	out.Spec.Template.Spec = *getPodSpec()
-	return nil
+
+	if len(out.Spec.Template.ObjectMeta.Labels) == 0 {
+		out.Spec.Template.ObjectMeta.Labels = map[string]string{}
+	}
+
+	for k, v := range Labels {
+		out.ObjectMeta.Labels[k] = v
+		out.Spec.Template.ObjectMeta.Labels[k] = v
+	}
+
+	out.Spec.Selector = metav1.SetAsLabelSelector(getLabels())
+
+	if len(out.Spec.Template.ObjectMeta.Annotations) == 0 {
+		out.Spec.Template.ObjectMeta.Annotations = map[string]string{}
+	}
+
+	for k, v := range annotations {
+		out.Spec.Template.ObjectMeta.Annotations[k] = v
+	}
+
+	return mergo.Merge(&out.Spec.Template.Spec, getPodSpec(), mergo.WithTransformers(transformers.PodSpec))
 }
 
-func getPodSpec() *corev1.PodSpec {
-	return &corev1.PodSpec{
+func getPodSpec() corev1.PodSpec {
+	return corev1.PodSpec{
 		Tolerations: []corev1.Toleration{
 			{
 				Key:    "node-role.kubernetes.io/master",
