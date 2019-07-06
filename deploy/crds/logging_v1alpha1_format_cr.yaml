@@ -1,7 +1,0 @@
-apiVersion: logging.pf9.io/v1alpha1
-kind: Format
-metadata:
-  name: example-format
-spec:
-  # Add fields here
-  size: 3

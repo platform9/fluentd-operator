@@ -11,9 +11,9 @@ import (
 type PipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	Source  string   `json:"source"`
+	Sources []string `json:"sources"`
 	Filters []string `json:"filters"`
-	Output  string   `json:"output"`
+	Outputs []string `json:"outputs"`
 }
 
 // PipelineStatus defines the observed state of Pipeline

@@ -21,6 +21,10 @@ const (
 	svcName    = "fluentd"
 )
 
+var volumePaths = map[string]string{
+	cfgMapName: "/fluentd/etc/",
+}
+
 // Labels defines operator enforced labels for fluentd deployment
 var Labels = map[string]string{
 	"k8s-app":                       "fluentd",
@@ -125,7 +129,7 @@ func (s *fdCfgMapSyncer) SyncFn(in runtime.Object) error {
 		if d, err := utils.GetCfgMapData("fluentd"); err != nil {
 			return err
 		} else {
-			out.Data = d
+			out.BinaryData = d
 		}
 	}
 	return nil
@@ -181,7 +185,11 @@ func getPodSpec() corev1.PodSpec {
 				Ports: []corev1.ContainerPort{{
 					Name:          "prometheus", // TODO: customize
 					ContainerPort: 2020,
-				}},
+				}, {
+					Name:          "source",
+					ContainerPort: 62073,
+				},
+				},
 				// TODO: Customize
 				Resources: corev1.ResourceRequirements{
 					Requests: corev1.ResourceList{
@@ -192,8 +200,34 @@ func getPodSpec() corev1.PodSpec {
 						"memory": resource.MustParse("200Mi"),
 					},
 				},
+				VolumeMounts: getVolumeMounts(),
 			},
 		},
+		Volumes:            getVolumes(),
 		ServiceAccountName: *(options.SvcAcct),
+	}
+}
+
+func getVolumeMounts() []corev1.VolumeMount {
+	return []corev1.VolumeMount{
+		{
+			Name:      cfgMapName,
+			MountPath: volumePaths[cfgMapName],
+		},
+	}
+}
+
+func getVolumes() []corev1.Volume {
+	return []corev1.Volume{
+		{
+			Name: cfgMapName,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: cfgMapName,
+					},
+				},
+			},
+		},
 	}
 }

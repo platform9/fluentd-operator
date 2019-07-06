@@ -13,7 +13,7 @@ func TestMain(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func getKeys(d map[string]string) []string {
+func getKeys(d map[string][]byte) []string {
 	keys := []string{}
 
 	for k := range d {
@@ -25,9 +25,10 @@ func getKeys(d map[string]string) []string {
 func TestGetConfigForFluentbit(t *testing.T) {
 	d, err := utils.GetCfgMapData("fluent-bit")
 	assert.Nil(t, err)
-	assert.Equal(t, 4, len(d))
+	assert.Equal(t, 6, len(d))
 	keys := getKeys(d)
-	assert.ElementsMatch(t, []string{"filter.conf", "fluent-bit.conf", "input.conf", "output.conf"}, keys)
+	assert.ElementsMatch(t, []string{"filter.conf", "fluent-bit.conf", "input.conf", "output.conf",
+		"parsers.conf", "null.conf"}, keys)
 }
 
 func TestGetConfigForFluentd(t *testing.T) {

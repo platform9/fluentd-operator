@@ -76,7 +76,7 @@ func (s *fbCfgMapSyncer) SyncFn(in runtime.Object) error {
 		if d, err := utils.GetCfgMapData("fluent-bit"); err != nil {
 			return err
 		} else {
-			out.Data = d
+			out.BinaryData = d
 		}
 	}
 	return nil
@@ -193,6 +193,10 @@ func getVolumeMounts() []corev1.VolumeMount {
 			Name:      cfgMapName,
 			MountPath: volumePaths[cfgMapName],
 		},
+		{
+			Name:      "position",
+			MountPath: "/db/",
+		},
 	}
 }
 
@@ -222,6 +226,12 @@ func getVolumes() []corev1.Volume {
 						Name: cfgMapName,
 					},
 				},
+			},
+		},
+		{
+			Name: "position",
+			VolumeSource: corev1.VolumeSource{
+				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
 		},
 	}
