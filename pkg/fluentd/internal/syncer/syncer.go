@@ -197,6 +197,7 @@ func getPodSpec() corev1.PodSpec {
 						"memory": resource.MustParse("200Mi"),
 					},
 					Limits: corev1.ResourceList{
+						"cpu":    resource.MustParse("1"),
 						"memory": resource.MustParse("200Mi"),
 					},
 				},
