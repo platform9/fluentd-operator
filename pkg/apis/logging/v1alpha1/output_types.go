@@ -11,6 +11,7 @@ import (
 type OutputSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
+	Type   string  `json:"type"`
 	Params []Param `json:"params,omitempty"`
 }
 

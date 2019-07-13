@@ -1,4 +1,4 @@
-package pipeline
+package output
 
 import (
 	"context"
@@ -19,14 +19,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_pipeline")
+var log = logf.Log.WithName("controller_output")
 
 /**
 * USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
 * business logic.  Delete these comments after modifying this file.*
  */
 
-// Add creates a new Pipeline Controller and adds it to the Manager. The Manager will set fields on the Controller
+// Add creates a new Output Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
@@ -34,59 +34,60 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcilePipeline{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileOutput{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("pipeline-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("output-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource Pipeline
-	err = c.Watch(&source.Kind{Type: &loggingv1alpha1.Pipeline{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to primary resource Output
+	err = c.Watch(&source.Kind{Type: &loggingv1alpha1.Output{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner Pipeline
-	//err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-	//	IsController: true,
-	//	OwnerType:    &loggingv1alpha1.Pipeline{},
-	//})
-	//if err != nil {
-	//	return err
-	//}
+	// Watch for changes to secondary resource Pods and requeue the owner Output
+	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &loggingv1alpha1.Output{},
+	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcilePipeline{}
+// blank assignment to verify that ReconcileOutput implements reconcile.Reconciler
+var _ reconcile.Reconciler = &ReconcileOutput{}
 
-// ReconcilePipeline reconciles a Pipeline object
-type ReconcilePipeline struct {
+// ReconcileOutput reconciles a Output object
+type ReconcileOutput struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a Pipeline object and makes changes based on the state read
-// and what is in the Pipeline.Spec
+// Reconcile reads that state of the cluster for a Output object and makes changes based on the state read
+// and what is in the Output.Spec
 // TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
 // a Pod as an example
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcilePipeline) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileOutput) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling Pipeline")
+	reqLogger.Info("Reconciling Output")
 
-	// Fetch the Pipeline instance
-	instance := &loggingv1alpha1.Pipeline{}
+	// Fetch the Output instance
+	instance := &loggingv1alpha1.Output{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -102,7 +103,7 @@ func (r *ReconcilePipeline) Reconcile(request reconcile.Request) (reconcile.Resu
 	// Define a new Pod object
 	pod := newPodForCR(instance)
 
-	// Set Pipeline instance as the owner and controller
+	// Set Output instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
@@ -129,7 +130,7 @@ func (r *ReconcilePipeline) Reconcile(request reconcile.Request) (reconcile.Resu
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *loggingv1alpha1.Pipeline) *corev1.Pod {
+func newPodForCR(cr *loggingv1alpha1.Output) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}
