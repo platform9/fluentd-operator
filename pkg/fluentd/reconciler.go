@@ -105,3 +105,18 @@ func (r *Reconciler) CreateIfNeeded() error {
 	}
 	return nil
 }
+
+// Refresh changes the fluentd configmap and reload it
+func (r *Reconciler) Refresh(data []byte) error {
+	syncers := []syncer.Interface{
+		fdsyncer.NewFluentdCfgMapSyncer(r.client, r.scheme, data),
+	}
+
+	for _, sync := range syncers {
+		if err := syncer.Sync(context.TODO(), sync, r.recorder); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

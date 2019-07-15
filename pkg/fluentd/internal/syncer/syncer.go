@@ -14,7 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
+
+var log = logf.Log.WithName("fluentd_syncer")
 
 const (
 	cfgMapName = "fluentd-config"
@@ -36,6 +39,7 @@ type fdSyncer struct {
 }
 
 type fdCfgMapSyncer struct {
+	data []byte
 }
 
 type fdSvcSyncer struct {
@@ -60,7 +64,7 @@ func NewFluentdSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interface 
 }
 
 // NewFluentdCfgMapSyncer returns a sync interface compliant implementation for fluentd configmap
-func NewFluentdCfgMapSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interface {
+func NewFluentdCfgMapSyncer(c client.Client, scheme *runtime.Scheme, params ...[]byte) syncer.Interface {
 	obj := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfgMapName,
@@ -69,6 +73,10 @@ func NewFluentdCfgMapSyncer(c client.Client, scheme *runtime.Scheme) syncer.Inte
 	}
 
 	sync := &fdCfgMapSyncer{}
+
+	if len(params) > 0 {
+		sync.data = params[0]
+	}
 
 	return syncer.NewObjectSyncer("ConfigMap", nil, obj, c, scheme, sync.SyncFn)
 }
@@ -125,13 +133,18 @@ func (s *fdCfgMapSyncer) SyncFn(in runtime.Object) error {
 		out.ObjectMeta.Labels[k] = v
 	}
 
-	if len(out.Data) == 0 {
+	if len(s.data) > 0 {
+		out.BinaryData = map[string][]byte{
+			"fluent.conf": s.data,
+		}
+	} else if len(out.BinaryData) == 0 {
 		if d, err := utils.GetCfgMapData("fluentd"); err != nil {
 			return err
 		} else {
 			out.BinaryData = d
 		}
 	}
+
 	return nil
 }
 
@@ -188,8 +201,11 @@ func getPodSpec() corev1.PodSpec {
 				}, {
 					Name:          "source",
 					ContainerPort: 62073,
-				},
-				},
+				}},
+				Env: []corev1.EnvVar{{
+					Name:  "FLUENT_ELASTICSEARCH_SED_DISABLE",
+					Value: "1",
+				}},
 				// TODO: Customize
 				Resources: corev1.ResourceRequirements{
 					Requests: corev1.ResourceList{

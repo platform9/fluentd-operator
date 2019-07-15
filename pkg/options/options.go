@@ -8,8 +8,9 @@ const (
 	defaultLogNs          = "logging"
 	defaultFluentSvcAct   = "fluent"
 	defaultFluentbitImage = "fluent/fluent-bit:1.0.6"
-	defaultFluentdImage   = "fluent/fluentd:v1.6"
+	defaultFluentdImage   = "fluent/fluentd-kubernetes-daemonset:v1.4-debian-elasticsearch-1"
 	defaultCfgDir         = "etc"
+	defaultFwdPort        = 62073
 )
 
 var (
@@ -23,4 +24,6 @@ var (
 	FluentdImage = flag.String("fluentd-image", defaultFluentdImage, "Fluentd imafge")
 	// CfgDir is the directory local to operator, which contains initial configuration of fluentd and fluentbit
 	CfgDir = flag.String("cfg-dir", defaultCfgDir, "Config directory")
+	// ForwardPort is fluentd port to which fluent-bit forwards logs
+	ForwardPort = flag.Int("fwd-port", defaultFwdPort, "Default forwarding port for fluentd")
 )

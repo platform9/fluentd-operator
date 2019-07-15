@@ -28,7 +28,7 @@ func TestValueFrom(t *testing.T) {
 		},
 	}
 
-	o := NewOutput(fake.NewFakeClient(&secret), obj)
+	o := NewOutput(fake.NewFakeClient(&secret), &obj)
 
 	assert.NotNil(t, o)
 
@@ -61,7 +61,7 @@ func TestEsParams(t *testing.T) {
 		},
 	}
 
-	o := NewOutput(fake.NewFakeClient(&secret), obj)
+	o := NewOutput(fake.NewFakeClient(&secret), &obj)
 
 	assert.NotNil(t, o)
 
@@ -115,7 +115,7 @@ func TestEsRender(t *testing.T) {
 		},
 	}
 
-	o := NewOutput(fake.NewFakeClient(&secret), obj)
+	o := NewOutput(fake.NewFakeClient(&secret), &obj)
 
 	assert.NotNil(t, o)
 

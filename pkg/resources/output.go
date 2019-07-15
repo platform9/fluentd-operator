@@ -16,12 +16,12 @@ import (
 // Output implements the Resource interface for type "output"
 type Output struct {
 	client     client.Client
-	obj        v1alpha1.Output
+	obj        *v1alpha1.Output
 	paramCache map[string]string
 }
 
 // NewOutput returns a new output resource
-func NewOutput(c client.Client, in v1alpha1.Output) *Output {
+func NewOutput(c client.Client, in *v1alpha1.Output) *Output {
 	return &Output{
 		client:     c,
 		obj:        in,
@@ -35,6 +35,7 @@ func (o *Output) Render() ([]byte, error) {
 		"stdout":        true,
 		"elasticsearch": true,
 		"s3":            true,
+		"ender":         true,
 	}
 	outputType := strings.ToLower(o.obj.Spec.Type)
 
@@ -53,18 +54,28 @@ func (o *Output) Render() ([]byte, error) {
 	}
 
 	var ret bytes.Buffer
-	fmt.Fprintf(&ret, "<match %s.**>", o.obj.Namespace)
+	fmt.Fprintf(&ret, "<match kube.**>")
 	for k, v := range params {
-		fmt.Fprintf(&ret, "\n%s %s", k, v)
+		fmt.Fprintf(&ret, "\n    %s    %s", k, v)
 	}
-	fmt.Fprintf(&ret, "\n </match>")
+	fmt.Fprintf(&ret, "\n    <buffer>")
+	fmt.Fprintf(&ret, "\n        @type file")
+	fmt.Fprintf(&ret, "\n        path ")
+	fmt.Fprintf(&ret, "\n</match>")
 
+	// Always append null match in the end
+	fmt.Fprintf(&ret, "\n<match **>")
+	fmt.Fprintf(&ret, "\n    @type null")
+	fmt.Fprintf(&ret, "\n</match>")
 	return ret.Bytes(), nil
 }
 
 func (o *Output) getEsParams() (map[string]string, error) {
-	indexName := fmt.Sprintf("fluentd-%s", o.obj.Namespace)
+	indexName := fmt.Sprintf("fluentd-%s", o.obj.Name)
 	params := map[string]string{}
+
+	params["@type"] = "stdout"
+
 	var err error
 
 	for _, p := range o.obj.Spec.Params {
