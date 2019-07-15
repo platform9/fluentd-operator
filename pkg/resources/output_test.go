@@ -76,3 +76,51 @@ func TestEsParams(t *testing.T) {
 		assert.True(t, ok)
 	}
 }
+
+func TestEsRender(t *testing.T) {
+	obj := v1alpha1.Output{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake",
+			Namespace: "fake",
+		},
+		Spec: v1alpha1.OutputSpec{
+			Type: "elasticsearch",
+			Params: []v1alpha1.Param{
+				v1alpha1.Param{
+					Name: "user",
+					ValueFrom: &v1alpha1.ValueFrom{
+						Name: "fake-secret",
+						Key:  "user",
+					},
+				},
+				v1alpha1.Param{
+					Name: "password",
+					ValueFrom: &v1alpha1.ValueFrom{
+						Name: "fake-secret",
+						Key:  "password",
+					},
+				},
+			},
+		},
+	}
+
+	secret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-secret",
+			Namespace: "fake",
+		},
+		StringData: map[string]string{
+			"user":     "fake-user",
+			"password": "fake-password",
+		},
+	}
+
+	o := NewOutput(fake.NewFakeClient(&secret), obj)
+
+	assert.NotNil(t, o)
+
+	_, err := o.Render()
+
+	assert.Nil(t, err)
+
+}
