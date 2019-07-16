@@ -113,6 +113,7 @@ func getFluentdConfig(cl client.Client) ([]byte, error) {
 
 	// Source rendering is not configucrable yet.
 	renderers := []resources.Resource{
+		resources.NewSystem(),
 		resources.NewSource(),
 	}
 

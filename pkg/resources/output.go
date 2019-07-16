@@ -51,6 +51,10 @@ func (o *Output) Render() ([]byte, error) {
 		if params, err = o.getEsParams(); err != nil {
 			return []byte{}, err
 		}
+	case "s3":
+		if params, err = o.getS3Params(); err != nil {
+			return []byte{}, err
+		}
 	}
 
 	var ret bytes.Buffer
@@ -58,9 +62,6 @@ func (o *Output) Render() ([]byte, error) {
 	for k, v := range params {
 		fmt.Fprintf(&ret, "\n    %s    %s", k, v)
 	}
-	fmt.Fprintf(&ret, "\n    <buffer>")
-	fmt.Fprintf(&ret, "\n        @type file")
-	fmt.Fprintf(&ret, "\n        path ")
 	fmt.Fprintf(&ret, "\n</match>")
 
 	// Always append null match in the end
@@ -74,7 +75,7 @@ func (o *Output) getEsParams() (map[string]string, error) {
 	indexName := fmt.Sprintf("fluentd-%s", o.obj.Name)
 	params := map[string]string{}
 
-	params["@type"] = "stdout"
+	params["@type"] = "elasticsearch"
 
 	var err error
 
@@ -114,6 +115,34 @@ func (o *Output) getEsParams() (map[string]string, error) {
 		params["port"] = "9200"
 		params["scheme"] = "http"
 	}
+	return params, nil
+}
+
+func (o *Output) getS3Params() (map[string]string, error) {
+	var params = make(map[string]string, 1)
+	params["@type"] = "s3"
+
+	for _, p := range o.obj.Spec.Params {
+		name := strings.ToLower(p.Name)
+		v := p.Value
+		var err error
+		if p.ValueFrom != nil {
+			if v, err = o.getValueFrom(p.ValueFrom); err != nil {
+				return map[string]string{}, err
+			}
+		}
+
+		params[name] = v
+	}
+
+	mandatoryParams := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_endpoint"}
+
+	for _, mp := range mandatoryParams {
+		if _, ok := params[mp]; !ok {
+			return map[string]string{}, fmt.Errorf("Mandatory S3 parameter %s is missing", mp)
+		}
+	}
+
 	return params, nil
 }
 

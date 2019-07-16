@@ -11,6 +11,7 @@ const (
 	defaultFluentdImage   = "fluent/fluentd-kubernetes-daemonset:v1.4-debian-elasticsearch-1"
 	defaultCfgDir         = "etc"
 	defaultFwdPort        = 62073
+	defaultReloadPort     = 45550
 )
 
 var (
@@ -21,9 +22,11 @@ var (
 	// FluentbitImage points to container image for running fluentbit
 	FluentbitImage = flag.String("fluentbit-image", defaultFluentbitImage, "Fluentbit image")
 	// FluentdImage points to container image for running fluentd
-	FluentdImage = flag.String("fluentd-image", defaultFluentdImage, "Fluentd imafge")
+	FluentdImage = flag.String("fluentd-image", defaultFluentdImage, "Fluentd image")
 	// CfgDir is the directory local to operator, which contains initial configuration of fluentd and fluentbit
 	CfgDir = flag.String("cfg-dir", defaultCfgDir, "Config directory")
 	// ForwardPort is fluentd port to which fluent-bit forwards logs
-	ForwardPort = flag.Int("fwd-port", defaultFwdPort, "Default forwarding port for fluentd")
+	ForwardPort = flag.Int("fwd-port", defaultFwdPort, "Forwarding port for fluentd")
+	// ReloadPort is fluentd rpc port which can reload config
+	ReloadPort = flag.Int("reload-port", defaultReloadPort, "RPC port for fluentd")
 )
