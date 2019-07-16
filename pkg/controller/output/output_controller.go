@@ -7,10 +7,8 @@ import (
 
 	"github.com/platform9/fluentd-operator/pkg/fluentd"
 
-	"github.com/platform9/fluentd-operator/pkg/resources"
-
 	loggingv1alpha1 "github.com/platform9/fluentd-operator/pkg/apis/logging/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/platform9/fluentd-operator/pkg/resources"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,11 +21,6 @@ import (
 )
 
 var log = logf.Log.WithName("controller_output")
-
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
 
 // Add creates a new Output Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -58,16 +51,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner Output
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &loggingv1alpha1.Output{},
-	})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -85,8 +68,6 @@ type ReconcileOutput struct {
 
 // Reconcile reads that state of the cluster for a Output object and makes changes based on the state read
 // and what is in the Output.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
@@ -108,8 +89,35 @@ func (r *ReconcileOutput) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
+	buff, err := getFluentdConfig(r.client)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Update configmap for fluentd
+	log.Info("Refreshing fluentd...")
+	return reconcile.Result{}, r.fluentd.Refresh(buff)
+}
+
+func getFluentdConfig(cl client.Client) ([]byte, error) {
+	// Simple algorithm to render all outputs once one changes. This lets us keep thing simple and write entire config
+	// as one.
+	instances := &loggingv1alpha1.OutputList{}
+	lo := client.ListOptions{}
+
+	err := cl.List(context.TODO(), &lo, instances)
+
+	if err != nil {
+		return []byte{}, err
+	}
+
+	// Source rendering is not configucrable yet.
 	renderers := []resources.Resource{
-		resources.NewSource(), resources.NewOutput(r.client, instance),
+		resources.NewSource(),
+	}
+
+	for _, inst := range instances.Items {
+		renderers = append(renderers, resources.NewOutput(cl, &inst))
 	}
 
 	var buff []byte
@@ -118,13 +126,11 @@ func (r *ReconcileOutput) Reconcile(request reconcile.Request) (reconcile.Result
 	for _, r := range renderers {
 		out, err := r.Render()
 		if err != nil {
-			return reconcile.Result{}, err
+			return []byte{}, err
 		}
 		buff = append(buff, out...)
 		buff = append(buff, newline.Bytes()...)
 	}
 
-	// Update configmap for fluentd
-	log.Info("Refreshing fluentd...")
-	return reconcile.Result{}, r.fluentd.Refresh(buff)
+	return buff, nil
 }
