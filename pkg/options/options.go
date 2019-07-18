@@ -8,7 +8,7 @@ const (
 	defaultLogNs          = "logging"
 	defaultFluentSvcAct   = "fluent"
 	defaultFluentbitImage = "fluent/fluent-bit:1.0.6"
-	defaultFluentdImage   = "fluent/fluentd-kubernetes-daemonset:v1.4-debian-elasticsearch-1"
+	defaultFluentdImage   = "platform9/fluentd:v1.0"
 	defaultCfgDir         = "etc"
 	defaultFwdPort        = 62073
 	defaultReloadPort     = 45550
