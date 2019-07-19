@@ -159,10 +159,10 @@ func TestS3Params(t *testing.T) {
 					},
 				},
 				v1alpha1.Param{
-					Name: "s3_endpoint",
+					Name: "s3_region",
 					ValueFrom: &v1alpha1.ValueFrom{
 						Name: "fake-secret",
-						Key:  "s3_endpoint",
+						Key:  "s3_region",
 					},
 				},
 			},
@@ -178,7 +178,7 @@ func TestS3Params(t *testing.T) {
 			"aws_key_id":  "fake-id",
 			"aws_sec_key": "fake-secret",
 			"s3_bucket":   "fake-bucket",
-			"s3_endpoint": "fake-endpoint",
+			"s3_region":   "fake-region",
 		},
 	}
 
@@ -190,7 +190,7 @@ func TestS3Params(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	keys := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_endpoint"}
+	keys := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_region"}
 
 	for _, k := range keys {
 		_, ok := params[k]
@@ -229,10 +229,10 @@ func TestS3Render(t *testing.T) {
 					},
 				},
 				v1alpha1.Param{
-					Name: "s3_endpoint",
+					Name: "s3_region",
 					ValueFrom: &v1alpha1.ValueFrom{
 						Name: "fake-secret",
-						Key:  "s3_endpoint",
+						Key:  "s3_region",
 					},
 				},
 			},
@@ -248,7 +248,7 @@ func TestS3Render(t *testing.T) {
 			"aws_key_id":  "fake-id",
 			"aws_sec_key": "fake-secret",
 			"s3_bucket":   "fake-bucket",
-			"s3_endpoint": "fake-endpoint",
+			"s3_region":   "fake-endpoint",
 		},
 	}
 

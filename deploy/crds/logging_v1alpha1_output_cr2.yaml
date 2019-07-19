@@ -1,0 +1,18 @@
+apiVersion: logging.pf9.io/v1alpha1
+kind: Output
+metadata:
+  name: example-s3
+spec:
+  # Add fields here
+  type: s3
+  params:
+    - name: aws_key_id
+      value: xyz
+    - name: aws_sec_key
+      value: pqr
+    - name: s3_bucket
+      value: foo
+    - name: s3_region
+      value: bar
+
+

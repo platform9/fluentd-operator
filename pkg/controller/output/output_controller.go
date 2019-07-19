@@ -117,8 +117,8 @@ func getFluentdConfig(cl client.Client) ([]byte, error) {
 		resources.NewSource(),
 	}
 
-	for _, inst := range instances.Items {
-		renderers = append(renderers, resources.NewOutput(cl, &inst))
+	for i := range instances.Items {
+		renderers = append(renderers, resources.NewOutput(cl, &instances.Items[i]))
 	}
 
 	var buff []byte

@@ -135,7 +135,7 @@ func (o *Output) getS3Params() (map[string]string, error) {
 		params[name] = v
 	}
 
-	mandatoryParams := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_endpoint"}
+	mandatoryParams := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_region"}
 
 	for _, mp := range mandatoryParams {
 		if _, ok := params[mp]; !ok {

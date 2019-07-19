@@ -1,7 +1,7 @@
 apiVersion: logging.pf9.io/v1alpha1
 kind: Output
 metadata:
-  name: example-output
+  name: example-es
 spec:
   # Add fields here
   type: elasticsearch
