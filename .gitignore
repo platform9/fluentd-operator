@@ -1,5 +1,4 @@
 .vscode
 *~
-_output
-build/fluentd*
+build
 
