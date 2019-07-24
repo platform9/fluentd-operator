@@ -38,13 +38,39 @@ rules:
   verbs:
   - get
   - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fluentd-operator-deployer
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  - deployments
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - configmaps
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
 - apiGroups:
   - logging.pf9.io
   resources:
   - '*'
-  - pipelines
-  - filters
-  - formats
-  - sources
   verbs:
   - '*'
+  
+
+

@@ -23,7 +23,7 @@ func NewSystem() *System {
 func (s *System) Render() ([]byte, error) {
 	var ret bytes.Buffer
 	fmt.Fprintf(&ret, "<system>")
-	fmt.Fprintf(&ret, fmt.Sprintf("\n    rpc_endpoint 127.0.0.1:%d", s.port))
+	fmt.Fprintf(&ret, fmt.Sprintf("\n    rpc_endpoint 0.0.0.0:%d", s.port))
 	fmt.Fprintf(&ret, "\n</system>")
 
 	return ret.Bytes(), nil

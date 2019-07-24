@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: fluent-read
+rules:
+- apiGroups: [""]
+  resources:
+  - namespaces
+  - pods
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["api/config.reload"]
+  verbs: ["post"]

@@ -79,14 +79,10 @@ func (r *ReconcileOutput) Reconcile(request reconcile.Request) (reconcile.Result
 	instance := &loggingv1alpha1.Output{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
-			return reconcile.Result{}, nil
+		if !errors.IsNotFound(err) {
+			// Error reading object, requeue
+			return reconcile.Result{}, err
 		}
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
 	}
 
 	buff, err := getFluentdConfig(r.client)
@@ -111,7 +107,7 @@ func getFluentdConfig(cl client.Client) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	// Source rendering is not configucrable yet.
+	// Source rendering is not configurable yet.
 	renderers := []resources.Resource{
 		resources.NewSystem(),
 		resources.NewSource(),

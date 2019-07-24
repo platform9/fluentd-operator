@@ -2,6 +2,9 @@ package fluentd
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 
 	"k8s.io/client-go/tools/record"
 
@@ -116,6 +119,26 @@ func (r *Reconciler) Refresh(data []byte) error {
 		if err := syncer.Sync(context.TODO(), sync, r.recorder); err != nil {
 			return err
 		}
+	}
+
+	// Reload service, if needed
+	svcURL := fmt.Sprintf("http://fluentd.%s.svc.cluster.local:45550/api/config.reload", *(options.LogNs))
+	req, err := http.NewRequest("POST", svcURL, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Info("When reloading fluentd", "error", err)
+	} else {
+		respStr, err := ioutil.ReadAll(resp.Body)
+		if err == nil {
+			log.Info("fluentd reload response", "status", resp.StatusCode, "message", string(respStr))
+		} else {
+			log.Error(err, "when reading response")
+		}
+		resp.Body.Close()
 	}
 
 	return nil

@@ -95,6 +95,12 @@ func NewFluentdSvcSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interfa
 					Protocol:   corev1.ProtocolTCP,
 					TargetPort: intstr.FromInt(62073),
 				},
+				corev1.ServicePort{
+					Name:       "webhook",
+					Port:       45550,
+					Protocol:   corev1.ProtocolTCP,
+					TargetPort: intstr.FromInt(45550),
+				},
 			},
 		},
 	}
@@ -230,6 +236,7 @@ func getVolumeMounts() []corev1.VolumeMount {
 		{
 			Name:      cfgMapName,
 			MountPath: volumePaths[cfgMapName],
+			ReadOnly:  true,
 		},
 	}
 }

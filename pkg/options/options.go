@@ -5,13 +5,14 @@ import (
 )
 
 const (
-	defaultLogNs          = "logging"
-	defaultFluentSvcAct   = "fluent"
-	defaultFluentbitImage = "fluent/fluent-bit:1.0.6"
-	defaultFluentdImage   = "platform9/fluentd:v1.0"
-	defaultCfgDir         = "etc"
-	defaultFwdPort        = 62073
-	defaultReloadPort     = 45550
+	defaultLogNs            = "logging"
+	defaultFluentSvcAct     = "fluent"
+	defaultFluentbitImage   = "fluent/fluent-bit:1.0.6"
+	defaultFluentdImage     = "platform9/fluentd:v1.0"
+	defaultCfgReloaderImage = "jimmidyson/configmap-reload:latest"
+	defaultCfgDir           = "etc/conf"
+	defaultFwdPort          = 62073
+	defaultReloadPort       = 45550
 )
 
 var (
@@ -29,4 +30,6 @@ var (
 	ForwardPort = flag.Int("fwd-port", defaultFwdPort, "Forwarding port for fluentd")
 	// ReloadPort is fluentd rpc port which can reload config
 	ReloadPort = flag.Int("reload-port", defaultReloadPort, "RPC port for fluentd")
+	// ConfigReloaderImage is the image for config-reloader sidecar
+	ConfigReloaderImage = flag.String("reloader-image", defaultCfgReloaderImage, "Config reloader image")
 )

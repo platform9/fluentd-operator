@@ -16,12 +16,14 @@ spec:
       containers:
         - name: fluentd-operator
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: platform9/fluentd-operator:latest
           ports:
           - containerPort: 60000
             name: metrics
           command:
-          - fluentd-operator
+          - /fluentd/bin/fluentd-operator
+          - -cfg-dir
+          - /fluentd/etc/conf
           imagePullPolicy: Always
           readinessProbe:
             exec:
@@ -33,9 +35,7 @@ spec:
             failureThreshold: 1
           env:
             - name: WATCH_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+              value: ""
             - name: POD_NAME
               valueFrom:
                 fieldRef:

@@ -9,7 +9,7 @@ import (
 
 // GetCfgMapData returns a map of filename==>contents
 func GetCfgMapData(subdir string) (map[string][]byte, error) {
-	subDir := fmt.Sprintf("%s/conf/%s", *(options.CfgDir), subdir)
+	subDir := fmt.Sprintf("%s/%s", *(options.CfgDir), subdir)
 	data := map[string][]byte{}
 	files, err := ioutil.ReadDir(subDir)
 	if err != nil {
