@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"k8s.io/client-go/tools/record"
-
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/go-logr/logr"
@@ -92,13 +91,17 @@ func (r *Reconciler) reconcile(reqLogger logr.Logger, current *appsv1.Deployment
 
 // CreateIfNeeded creates fluentd deployment if needed
 func (r *Reconciler) CreateIfNeeded() error {
-	syncers := []syncer.Interface{fdsyncer.NewFluentdSyncer(r.client, r.scheme),
-		fdsyncer.NewFluentdCfgMapSyncer(r.client, r.scheme),
-		fdsyncer.NewFluentdSvcSyncer(r.client, r.scheme),
+	return createIfNeeded(r.client, r.scheme, r.recorder)
+}
+
+func createIfNeeded(c client.Client, s *runtime.Scheme, e record.EventRecorder) error {
+	syncers := []syncer.Interface{fdsyncer.NewFluentdSyncer(c, s),
+		fdsyncer.NewFluentdCfgMapSyncer(c, s),
+		fdsyncer.NewFluentdSvcSyncer(c, s),
 	}
 
 	for _, sync := range syncers {
-		if err := syncer.Sync(context.TODO(), sync, r.recorder); err != nil {
+		if err := syncer.Sync(context.TODO(), sync, e); err != nil {
 			if errors.IsAlreadyExists(err) {
 				log.Info("fluentd object already exists, skipping...")
 				continue
@@ -111,18 +114,22 @@ func (r *Reconciler) CreateIfNeeded() error {
 
 // Refresh changes the fluentd configmap and reload it
 func (r *Reconciler) Refresh(data []byte) error {
+	return refresh(r.client, r.scheme, r.recorder, data)
+}
+
+func refresh(c client.Client, s *runtime.Scheme, e record.EventRecorder, data []byte) error {
 	syncers := []syncer.Interface{
-		fdsyncer.NewFluentdCfgMapSyncer(r.client, r.scheme, data),
+		fdsyncer.NewFluentdCfgMapSyncer(c, s, data),
 	}
 
 	for _, sync := range syncers {
-		if err := syncer.Sync(context.TODO(), sync, r.recorder); err != nil {
+		if err := syncer.Sync(context.TODO(), sync, e); err != nil {
 			return err
 		}
 	}
 
 	// Reload service, if needed
-	svcURL := fmt.Sprintf("http://fluentd.%s.svc.cluster.local:45550/api/config.reload", *(options.LogNs))
+	svcURL := fmt.Sprintf("http://%s:%d/api/config.reload", *(options.ReloadHost), *(options.ReloadPort))
 	req, err := http.NewRequest("POST", svcURL, nil)
 	if err != nil {
 		return err
@@ -141,5 +148,5 @@ func (r *Reconciler) Refresh(data []byte) error {
 		resp.Body.Close()
 	}
 
-	return nil
+	return err
 }

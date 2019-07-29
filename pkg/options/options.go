@@ -5,14 +5,14 @@ import (
 )
 
 const (
-	defaultLogNs            = "logging"
-	defaultFluentSvcAct     = "fluent"
-	defaultFluentbitImage   = "fluent/fluent-bit:1.0.6"
-	defaultFluentdImage     = "platform9/fluentd:v1.0"
-	defaultCfgReloaderImage = "jimmidyson/configmap-reload:latest"
-	defaultCfgDir           = "etc/conf"
-	defaultFwdPort          = 62073
-	defaultReloadPort       = 45550
+	defaultLogNs          = "logging"
+	defaultFluentSvcAct   = "fluent"
+	defaultFluentbitImage = "fluent/fluent-bit:1.0.6"
+	defaultFluentdImage   = "platform9/fluentd:v1.0"
+	defaultCfgDir         = "etc/conf"
+	defaultFwdPort        = 62073
+	defaultReloadPort     = 45550
+	defaultReloadHost     = "fluentd.logging.svc.cluster.local"
 )
 
 var (
@@ -28,8 +28,8 @@ var (
 	CfgDir = flag.String("cfg-dir", defaultCfgDir, "Config directory")
 	// ForwardPort is fluentd port to which fluent-bit forwards logs
 	ForwardPort = flag.Int("fwd-port", defaultFwdPort, "Forwarding port for fluentd")
-	// ReloadPort is fluentd rpc port which can reload config
-	ReloadPort = flag.Int("reload-port", defaultReloadPort, "RPC port for fluentd")
-	// ConfigReloaderImage is the image for config-reloader sidecar
-	ConfigReloaderImage = flag.String("reloader-image", defaultCfgReloaderImage, "Config reloader image")
+	// ReloadPort is fluentd port used to reload fluentd config
+	ReloadPort = flag.Int("reload-port", defaultReloadPort, "Fluentd config reload port")
+	// ReloadHost refers to fluentd reload webhook
+	ReloadHost = flag.String("reload-host", defaultReloadHost, "Fluentd reload host")
 )
