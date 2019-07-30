@@ -23,7 +23,11 @@ Logging operator uses fluent-bit and fluentd for collection and processing of lo
 
 
 #### Install ####
-
+Simplest way to install is with bundled deploy script
+```
+./hack/deploy.sh
+```
+If you are curious, deploy.sh creates prerequesite namespaces and applies yaml manifests under deploy/ directory.
 #### Example Usage ####
 1. Deploy nginx pod from Kubernetes example repo:
 ```
