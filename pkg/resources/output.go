@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -95,8 +96,8 @@ func (o *Output) getEsParams() (map[string]string, error) {
 	for _, p := range o.obj.Spec.Params {
 		name := strings.ToLower(p.Name)
 		v := p.Value
-		if p.ValueFrom != nil {
-			if v, err = o.getValueFrom(p.ValueFrom); err != nil {
+		if len(v) == 0 {
+			if v, err = o.getValueFrom(&p.ValueFrom); err != nil {
 				return map[string]string{}, err
 			}
 		}
@@ -139,8 +140,8 @@ func (o *Output) getS3Params() (map[string]string, error) {
 		name := strings.ToLower(p.Name)
 		v := p.Value
 		var err error
-		if p.ValueFrom != nil {
-			if v, err = o.getValueFrom(p.ValueFrom); err != nil {
+		if len(v) == 0 {
+			if v, err = o.getValueFrom(&p.ValueFrom); err != nil {
 				return map[string]string{}, err
 			}
 		}
@@ -160,21 +161,22 @@ func (o *Output) getS3Params() (map[string]string, error) {
 }
 
 func (o *Output) getValueFrom(vf *v1alpha1.ValueFrom) (string, error) {
-	key := fmt.Sprintf("%s.%s", vf.Name, vf.Key)
+	key := fmt.Sprintf("%s.%s.%s", vf.Namespace, vf.Name, vf.Key)
 	if v, ok := o.paramCache[key]; ok {
 		return v, nil
 	}
 
 	secret := corev1.Secret{}
-	secretName := types.NamespacedName{Name: vf.Name, Namespace: o.obj.Namespace}
+	secretName := types.NamespacedName{Name: vf.Name, Namespace: vf.Namespace}
 
 	if err := o.client.Get(context.TODO(), secretName, &secret); err != nil {
+		log.Printf("Secret: %s, Error: %s", key, err)
 		return "", err
 	}
 
-	for k, v := range secret.StringData {
-		key = fmt.Sprintf("%s.%s", vf.Name, k)
-		o.paramCache[key] = v
+	for k, v := range secret.Data {
+		key = fmt.Sprintf("%s.%s.%s", vf.Namespace, vf.Name, k)
+		o.paramCache[key] = string(v)
 	}
 
 	if v, ok := o.paramCache[key]; ok {

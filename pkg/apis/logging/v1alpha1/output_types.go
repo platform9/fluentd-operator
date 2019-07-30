@@ -30,15 +30,16 @@ type OutputSpec struct {
 
 // Param defines a parameter to be passed along with output, such as credentials
 type Param struct {
-	Name      string     `json:"name"`
-	ValueFrom *ValueFrom `json:"valueFrom,omitempty"`
-	Value     string     `json:"value"`
+	Name      string    `json:"name"`
+	ValueFrom ValueFrom `json:"valueFrom,omitempty"`
+	Value     string    `json:"value"`
 }
 
 // ValueFrom defines a reference to credentials specified in a kubernetes secret
 type ValueFrom struct {
-	Name string `json:"name"`
-	Key  string `json:"key"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Key       string `json:"key"`
 }
 
 // OutputStatus defines the observed state of Output

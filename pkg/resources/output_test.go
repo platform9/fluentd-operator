@@ -36,8 +36,8 @@ func TestValueFrom(t *testing.T) {
 			Name:      "fake-secret",
 			Namespace: "fake",
 		},
-		StringData: map[string]string{
-			"fake-key": "fake-val",
+		Data: map[string][]byte{
+			"fake-key": []byte("fake-val"),
 		},
 	}
 
@@ -71,9 +71,9 @@ func TestEsParams(t *testing.T) {
 			Name:      "fake-secret",
 			Namespace: "fake",
 		},
-		StringData: map[string]string{
-			"user":     "fake-user",
-			"password": "fake-password",
+		Data: map[string][]byte{
+			"user":     []byte("fake-user"),
+			"password": []byte("fake-password"),
 		},
 	}
 
@@ -104,14 +104,14 @@ func TestEsRender(t *testing.T) {
 			Params: []v1alpha1.Param{
 				v1alpha1.Param{
 					Name: "user",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "user",
 					},
 				},
 				v1alpha1.Param{
 					Name: "password",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "password",
 					},
@@ -125,9 +125,9 @@ func TestEsRender(t *testing.T) {
 			Name:      "fake-secret",
 			Namespace: "fake",
 		},
-		StringData: map[string]string{
-			"user":     "fake-user",
-			"password": "fake-password",
+		Data: map[string][]byte{
+			"user":     []byte("fake-user"),
+			"password": []byte("fake-password"),
 		},
 	}
 
@@ -152,28 +152,28 @@ func TestS3Params(t *testing.T) {
 			Params: []v1alpha1.Param{
 				v1alpha1.Param{
 					Name: "aws_key_id",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "aws_key_id",
 					},
 				},
 				v1alpha1.Param{
 					Name: "aws_sec_key",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "aws_sec_key",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_bucket",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "s3_bucket",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_region",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "s3_region",
 					},
@@ -187,11 +187,11 @@ func TestS3Params(t *testing.T) {
 			Name:      "fake-secret",
 			Namespace: "fake",
 		},
-		StringData: map[string]string{
-			"aws_key_id":  "fake-id",
-			"aws_sec_key": "fake-secret",
-			"s3_bucket":   "fake-bucket",
-			"s3_region":   "fake-region",
+		Data: map[string][]byte{
+			"aws_key_id":  []byte("fake-id"),
+			"aws_sec_key": []byte("fake-secret"),
+			"s3_bucket":   []byte("fake-bucket"),
+			"s3_region":   []byte("fake-region"),
 		},
 	}
 
@@ -222,28 +222,28 @@ func TestS3Render(t *testing.T) {
 			Params: []v1alpha1.Param{
 				v1alpha1.Param{
 					Name: "aws_key_id",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "aws_key_id",
 					},
 				},
 				v1alpha1.Param{
 					Name: "aws_sec_key",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "aws_sec_key",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_bucket",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "s3_bucket",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_region",
-					ValueFrom: &v1alpha1.ValueFrom{
+					ValueFrom: v1alpha1.ValueFrom{
 						Name: "fake-secret",
 						Key:  "s3_region",
 					},
@@ -257,11 +257,11 @@ func TestS3Render(t *testing.T) {
 			Name:      "fake-secret",
 			Namespace: "fake",
 		},
-		StringData: map[string]string{
-			"aws_key_id":  "fake-id",
-			"aws_sec_key": "fake-secret",
-			"s3_bucket":   "fake-bucket",
-			"s3_region":   "fake-endpoint",
+		Data: map[string][]byte{
+			"aws_key_id":  []byte("fake-id"),
+			"aws_sec_key": []byte("fake-secret"),
+			"s3_bucket":   []byte("fake-bucket"),
+			"s3_region":   []byte("fake-endpoint"),
 		},
 	}
 
