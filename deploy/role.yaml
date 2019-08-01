@@ -58,6 +58,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
 - apiGroups:
   - logging.pf9.io
   resources:

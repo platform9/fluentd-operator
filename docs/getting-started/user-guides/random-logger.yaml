@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logger-deployment
+  labels:
+    app: random-logger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: random-logger
+  template:
+    metadata:
+      labels:
+        app: random-logger
+    spec:
+      containers:
+      - name: logger
+        image: chentex/random-logger:latest

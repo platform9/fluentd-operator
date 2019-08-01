@@ -61,6 +61,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to primary resource Output
 	err = c.Watch(&source.Kind{Type: &loggingv1alpha1.Output{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
+		log.Error(err, "Error adding watch")
 		return err
 	}
 

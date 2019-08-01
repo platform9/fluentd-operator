@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 
@@ -74,7 +73,7 @@ func (o *Output) Render() ([]byte, error) {
 	var ret bytes.Buffer
 	fmt.Fprintf(&ret, "<match kube.**>")
 	for k, v := range params {
-		fmt.Fprintf(&ret, "\n    %s    %s", k, v)
+		fmt.Fprintf(&ret, "\n    %s %s", k, v)
 	}
 	fmt.Fprintf(&ret, "\n</match>")
 
@@ -149,7 +148,7 @@ func (o *Output) getS3Params() (map[string]string, error) {
 		params[name] = v
 	}
 
-	mandatoryParams := []string{"aws_key_id", "aws_sec_key", "s3_bucket", "s3_region"}
+	mandatoryParams := []string{"s3_bucket", "s3_region"}
 
 	for _, mp := range mandatoryParams {
 		if _, ok := params[mp]; !ok {
@@ -161,26 +160,17 @@ func (o *Output) getS3Params() (map[string]string, error) {
 }
 
 func (o *Output) getValueFrom(vf *v1alpha1.ValueFrom) (string, error) {
-	key := fmt.Sprintf("%s.%s.%s", vf.Namespace, vf.Name, vf.Key)
-	if v, ok := o.paramCache[key]; ok {
-		return v, nil
-	}
-
 	secret := corev1.Secret{}
 	secretName := types.NamespacedName{Name: vf.Name, Namespace: vf.Namespace}
 
 	if err := o.client.Get(context.TODO(), secretName, &secret); err != nil {
-		log.Printf("Secret: %s, Error: %s", key, err)
 		return "", err
 	}
 
 	for k, v := range secret.Data {
-		key = fmt.Sprintf("%s.%s.%s", vf.Namespace, vf.Name, k)
-		o.paramCache[key] = string(v)
-	}
-
-	if v, ok := o.paramCache[key]; ok {
-		return v, nil
+		if k == vf.Key {
+			return fmt.Sprintf("\"%s\"", string(v)), nil
+		}
 	}
 
 	return "", fmt.Errorf("Key %s was not found in secret %s", vf.Key, vf.Name)

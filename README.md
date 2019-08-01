@@ -23,24 +23,24 @@ Simplest way to install is with bundled deploy script
 ```
 If you are curious, deploy.sh creates prerequesite namespaces and applies yaml manifests under deploy/ directory.
 #### Example Usage With Object Store ####
-This example shows how to forward logs to an object storage. We will be using Minio, but the same example works with S3 as well.
-0. Deploy Minio on Kubernetes
+This example shows how to forward logs to an object storage. We will be using S3.
+1. Deploy random logger as kubernetes deployment
 ```bash
-kubectl apply -f docs/getting-started/
+kubectl apply -f docs/getting-started/user-guides/random-logger.yaml
 ```
-This creates a secret containing api key and secret key referenced by minio process, a deployment for minio and a service to access minio api
-1. Deploy nginx pod from Kubernetes example repo:
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/deployment.yaml
+2. Create a bucket named "test" in S3.
+3. Create a kubernetes secret and specify your access and secret keys to gain access to this S3 bucket
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3
+type: Opaque
+stringData:
+  access_key: <aws access key>
+  secret_key: <aws secret key>
 ```
-2. Create a bucket named "test" in minio. Minio deployment creates a service named minio-service and listens on port 9000. To log into minio env, forward the local port 9000 to minio-service 9000 inside the cluster
-```bash
-kubectl port-forward svc/minio-service 9000
-```
-Then login to localhost:9000 from your browser.
-The access key and secret key values can be extracted from secret "minio". Note that they are in base64 format. You need to decode before pasting values in the browser window.
-
-3. We will now use this endpoint and credentials in its secret to configure a store for logs.
+4. Create output CR indicating S3 as destination. Note the AWS secrets referenced by specifying the secret name and key within it.
 ```yaml
 apiVersion: logging.pf9.io/v1alpha1
 kind: Output
@@ -51,19 +51,17 @@ spec:
   params:
     - name: aws_key_id
       valueFrom:
-        secretKeyRef:
-          name: minio
-          key: MINIO_ACCESS_KEY
-    - name: port
-      value: 9000
+        name: s3
+        namespace: default
+        key: access_key
     - name: aws_sec_key
       valueFrom:
-        secretKeyRef:
-          name: minio
-          key: MINIO_SECRET_KEY
-    - name: s3_bucket
-      value: test
+        name: s3
+        namespace: default
+        key: sec_key
     - name: s3_region
-      value: us-east-1 # default region used by minio
+      value: <s3 region name>
+    - name: s3_bucket
+      value: <s3 bucket name>
 ```
 

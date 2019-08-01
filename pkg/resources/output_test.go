@@ -52,7 +52,7 @@ func TestValueFrom(t *testing.T) {
 
 	val, err := o.getValueFrom(&vf)
 	assert.Nil(t, err)
-	assert.Equal(t, "fake-val", val)
+	assert.Equal(t, "\"fake-val\"", val)
 }
 
 func TestEsParams(t *testing.T) {
