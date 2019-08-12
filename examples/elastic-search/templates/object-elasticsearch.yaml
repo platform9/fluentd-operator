@@ -1,0 +1,9 @@
+apiVersion: logging.pf9.io/v1alpha1
+kind: Output
+metadata:
+  name: es-object
+spec:
+  type: elasticsearch
+  params:
+    - name: url
+      value: http://elasticsearch.es-logging.svc.cluster.local:9200 
