@@ -58,7 +58,7 @@ spec:
       valueFrom:
         name: s3
         namespace: default
-        key: sec_key
+        key: secret_key
     - name: s3_region
       value: <s3 region name>
     - name: s3_bucket
