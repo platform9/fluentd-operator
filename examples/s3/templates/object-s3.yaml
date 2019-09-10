@@ -1,0 +1,21 @@
+apiVersion: logging.pf9.io/v1alpha1
+kind: Output
+metadata:
+  name: objstore
+spec:
+  type: s3
+  params:
+    - name: aws_key_id
+      valueFrom:
+        name: s3
+        namespace: default
+        key: access_key
+    - name: aws_sec_key
+      valueFrom:
+        name: s3
+        namespace: default
+        key: secret_key
+    - name: s3_region
+      value: <s3 region name>
+    - name: s3_bucket
+      value: <s3 bucket name> 
