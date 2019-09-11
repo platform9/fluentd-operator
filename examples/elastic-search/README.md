@@ -21,4 +21,10 @@ spec:
   params:
     - name: url
       value: <elastic-search url>
+    - name: user
+      value: <user-name>
+    - name: password
+      value: <user-password>
+    - name: index_name
+      value: <index-name>
 ```
