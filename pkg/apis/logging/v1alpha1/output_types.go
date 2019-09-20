@@ -49,6 +49,7 @@ type OutputStatus struct {
 }
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Output is the Schema for the outputs API
