@@ -48,6 +48,8 @@ type OutputStatus struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 }
 
+// +genclient
+// +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Output is the Schema for the outputs API
