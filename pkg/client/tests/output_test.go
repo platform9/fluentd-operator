@@ -10,124 +10,184 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestList(t *testing.T) {
-	var test = struct {
-		description string
-		expected    string
-		actual      string
-		obj         runtime.Object
-	}{
-		"List output objects", "v1alpha1.OutputList", "", &loggingv1alpha1.Output{},
-	}
-
-	client := fake.NewSimpleClientset(test.obj)
-	result, err := client.LoggingV1alpha1().Outputs().List(metav1.ListOptions{})
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-	}
-	test.actual = reflect.TypeOf(*result).String()
-	if test.actual != test.expected {
-		t.Errorf("Unexpected result. ( Got: %s, want: %s )", test.actual, test.expected)
-	}
+var input = &loggingv1alpha1.Output{
+	ObjectMeta: metav1.ObjectMeta{
+		Name: "sample-objstore",
+	},
+	Spec: loggingv1alpha1.OutputSpec{
+		Type:   "elasticsearch",
+		Params: []loggingv1alpha1.Param{},
+	},
 }
 
 func TestCreate(t *testing.T) {
 	var test = struct {
 		description string
 		expected    string
-		actual      string
 		obj         runtime.Object
 	}{
-		"Create output object", "v1alpha1.Output", "", &loggingv1alpha1.Output{},
-	}
-
-	input := &loggingv1alpha1.Output{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "sample-objstore",
-		},
-		Spec: loggingv1alpha1.OutputSpec{
-			Type:   "elasticsearch",
-			Params: []loggingv1alpha1.Param{},
-		},
+		"Create Output Custom Resource", "v1alpha1.Output", &loggingv1alpha1.Output{},
 	}
 
 	client := fake.NewSimpleClientset(test.obj)
 	result, err := client.LoggingV1alpha1().Outputs().Create(input)
 	if err != nil {
+		t.Errorf("Error creating Output object. Error is: %s", err)
+	}
+
+	// Checking type of the result
+	t.Run("check result type", func(t *testing.T) {
+		if test.expected != reflect.TypeOf(*result).String() {
+			t.Errorf("Got Unexpected result. Result: %v", result)
+		}
+	})
+}
+
+func TestList(t *testing.T) {
+	var test = struct {
+		description string
+		expected    string
+		obj         runtime.Object
+	}{
+		"List Output Custom Resource Objects", "v1alpha1.OutputList", &loggingv1alpha1.Output{},
+	}
+
+	client := fake.NewSimpleClientset(test.obj)
+	object, err := client.LoggingV1alpha1().Outputs().Create(input)
+	if err != nil {
+		t.Errorf("Error creating Output object. Error is: %s", err)
+	}
+
+	result, err := client.LoggingV1alpha1().Outputs().List(metav1.ListOptions{})
+	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
-	test.actual = reflect.TypeOf(*result).String()
-	if test.actual != test.expected {
-		t.Errorf("Unexpected result. ( Got: %s, want: %s )", test.actual, test.expected)
-	}
+
+	// Checking type of the result
+	t.Run("check result type", func(t *testing.T) {
+		if test.expected != reflect.TypeOf(*result).String() {
+			t.Errorf("Got Unexpected result. Result: %v ", result)
+		}
+	})
+
+	// Checking if object is present in the OutputList
+	t.Run("check output object", func(t *testing.T) {
+		status := false
+		for _, element := range result.Items {
+			if object.ObjectMeta.Name == element.ObjectMeta.Name {
+				status = true
+				break
+			}
+		}
+		if status == false {
+			t.Errorf("Unexpected result. Didn't get object %s in the Output List", object.ObjectMeta.Name)
+		}
+	})
 }
 
 func TestGet(t *testing.T) {
 	var test = struct {
 		description string
-		input       string
+		name        string
 		expected    string
-		actual      string
 		obj         runtime.Object
 	}{
-		"List output objects", "sample-objstore", "v1alpha1.Output", "", &loggingv1alpha1.Output{},
+		"Get Output Custom Resource object", "sample-objstore", "v1alpha1.Output", &loggingv1alpha1.Output{},
 	}
 
 	client := fake.NewSimpleClientset(test.obj)
-	result, err := client.LoggingV1alpha1().Outputs().Get(test.input, metav1.GetOptions{})
+	object, err := client.LoggingV1alpha1().Outputs().Create(input)
+	if err != nil {
+		t.Errorf("Error creating Output object. Error is: %s", err)
+	}
+
+	result, err := client.LoggingV1alpha1().Outputs().Get(test.name, metav1.GetOptions{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
-	test.actual = reflect.TypeOf(*result).String()
-	if test.actual != test.expected {
-		t.Errorf("Unexpected result. ( Got: %s, want: %s )", test.actual, test.expected)
-	}
+
+	// Checking type of the result
+	t.Run("check result type", func(t *testing.T) {
+		if test.expected != reflect.TypeOf(*result).String() {
+			t.Errorf("Got Unexpected result. Result: %v", result)
+		}
+	})
+
+	// Checking if object is returned in the result
+	t.Run("check output object", func(t *testing.T) {
+		if result == object {
+			t.Errorf("Unexpected result. Didn't get object %s in the Output List", object.ObjectMeta.Name)
+		}
+	})
 }
 
 func TestUpdate(t *testing.T) {
 	var test = struct {
 		description string
 		expected    string
-		actual      string
 		obj         runtime.Object
 	}{
-		"Create output object", "v1alpha1.Output", "", &loggingv1alpha1.Output{},
+		"Update Output Custom Resource Object", "v1alpha1.Output", &loggingv1alpha1.Output{},
 	}
 
-	input := &loggingv1alpha1.Output{
+	newInput := &loggingv1alpha1.Output{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "sample-objstore",
 		},
 		Spec: loggingv1alpha1.OutputSpec{
-			Type:   "elasticsearch",
-			Params: []loggingv1alpha1.Param{},
+			Type: "elasticsearch",
+			Params: []loggingv1alpha1.Param{
+				{
+					Name:  "url",
+					Value: "http://elasticsearch.default.svc.cluster.local:9200 ",
+				},
+			},
 		},
 	}
 
 	client := fake.NewSimpleClientset(test.obj)
-	result, err := client.LoggingV1alpha1().Outputs().Update(input)
+	object, err := client.LoggingV1alpha1().Outputs().Create(input)
+	if err != nil {
+		t.Errorf("Error creating Output object. Error is: %s", err)
+	}
+
+	result, err := client.LoggingV1alpha1().Outputs().Update(newInput)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
-	test.actual = reflect.TypeOf(*result).String()
-	if test.actual != test.expected {
-		t.Errorf("Unexpected result. ( Got: %s, want: %s )", test.actual, test.expected)
-	}
+
+	// Checking type of result
+	t.Run("check result type", func(t *testing.T) {
+		if test.expected != reflect.TypeOf(*result).String() {
+			t.Errorf("Got Unexpected result. Result: %v", result)
+		}
+	})
+
+	// Checking if object is returned in the result
+	t.Run("check output object", func(t *testing.T) {
+		if result == object {
+			t.Errorf("Unexpected result. Didn't get object %s in the Output List", object.ObjectMeta.Name)
+		}
+	})
 }
 
 func TestDelete(t *testing.T) {
 	var test = struct {
 		description string
-		input       string
+		name        string
 		expected    string
-		actual      string
 		obj         runtime.Object
 	}{
-		"Delete output object", "sample-objstore", "v1alpha1.Output", "", &loggingv1alpha1.Output{},
+		"Delete Output Custom Resource Object", "sample-objstore", "v1alpha1.Output", &loggingv1alpha1.Output{},
 	}
 
 	client := fake.NewSimpleClientset(test.obj)
-	err := client.LoggingV1alpha1().Outputs().Delete(test.input, &metav1.DeleteOptions{})
+	_, err := client.LoggingV1alpha1().Outputs().Create(input)
+	if err != nil {
+		t.Errorf("Error creating Output object. Error is: %s", err)
+	}
+
+	err = client.LoggingV1alpha1().Outputs().Delete(test.name, &metav1.DeleteOptions{})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 	}
