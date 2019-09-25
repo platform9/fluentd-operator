@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	apixv1beta1client "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
@@ -113,6 +114,12 @@ func checkCRDExists(apixClient apixv1beta1client.ApiextensionsV1beta1Interface) 
 func createCrs(coreClient corev1.CoreV1Interface, lc logclient.LoggingV1alpha1Interface) {
 	// Read the secret, create struct
 	sec, err := coreClient.Secrets(dataNs).Get(dataSrc, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		// Assumptions: Before CRDs show up, secret containing user-data is already created.
+		log.Print("Secret was not found, assuming no customizations needed")
+		os.Exit(0)
+	}
+
 	errExit("while querying data secret", err)
 
 	v, ok := sec.Data["user-data"]
@@ -126,7 +133,12 @@ func createCrs(coreClient corev1.CoreV1Interface, lc logclient.LoggingV1alpha1In
 
 	for _, o := range outputs {
 		_, err = lc.LoggingV1alpha1().Outputs().Create(&o)
-		errExit("while creating output object", err)
+		if errors.IsAlreadyExists(err) {
+			log.Printf("Output %s already exists in %s, skipping", o.Name, o.Namespace)
+			continue
+		} else {
+			errExit("while creating output object", err)
+		}
 	}
 }
 
