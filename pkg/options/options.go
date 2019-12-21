@@ -21,7 +21,7 @@ const (
 	defaultLogNs          = "logging"
 	defaultFluentSvcAct   = "fluent"
 	defaultFluentbitImage = "fluent/fluent-bit:1.0.6"
-	defaultFluentdImage   = "platform9/fluentd:v1.0"
+	defaultFluentdImage   = "platform9/fluentd:v1.1"
 	defaultCfgDir         = "etc/conf"
 	defaultFwdPort        = 62073
 	defaultReloadPort     = 45550
