@@ -47,6 +47,7 @@ func (o *Output) Render() ([]byte, error) {
 	validTypes := map[string]bool{
 		"stdout":        true,
 		"elasticsearch": true,
+		"loki":          true,
 		"s3":            true,
 		"ender":         true,
 	}
@@ -62,6 +63,10 @@ func (o *Output) Render() ([]byte, error) {
 	switch outputType {
 	case "elasticsearch":
 		if params, err = o.getEsParams(); err != nil {
+			return []byte{}, err
+		}
+	case "loki":
+		if params, err = o.getLokiParams(); err != nil {
 			return []byte{}, err
 		}
 	case "s3":
@@ -128,6 +133,28 @@ func (o *Output) getEsParams() (map[string]string, error) {
 		params["port"] = "9200"
 		params["scheme"] = "http"
 	}
+	return params, nil
+}
+
+func (o *Output) getLokiParams() (map[string]string, error) {
+	params := map[string]string{}
+
+	params["@type"] = "loki"
+
+	var err error
+
+	for _, p := range o.obj.Spec.Params {
+		name := strings.ToLower(p.Name)
+		v := p.Value
+		if len(v) == 0 {
+			if v, err = o.getValueFrom(&p.ValueFrom); err != nil {
+				return map[string]string{}, err
+			}
+		}
+
+		params[name] = v
+	}
+
 	return params, nil
 }
 

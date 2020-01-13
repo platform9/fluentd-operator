@@ -1,0 +1,17 @@
+apiVersion: logging.pf9.io/v1alpha1
+kind: Output
+metadata:
+  name: loki-object
+spec:
+  type: loki
+  params:
+    - name: url
+      value: http://loki.default.svc.cluster.local:3100
+    - name: extra_labels
+      value: {"env":"dev"}
+    - name: flush_interval
+      value: 10s
+    - name: flush_at_shutdown
+      value: true
+    - name: buffer_chunk_limit
+      value: 1m 
