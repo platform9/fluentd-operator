@@ -8,10 +8,8 @@ spec:
     - name: url
       value: http://loki.default.svc.cluster.local:3100
     - name: extra_labels
-      value: {"env":"dev"}
+      value: '{"env": "pf9-log"}'
     - name: flush_interval
-      value: 10s
-    - name: flush_at_shutdown
-      value: true
+      value: 1s
     - name: buffer_chunk_limit
-      value: 1m 
+      value: 1m

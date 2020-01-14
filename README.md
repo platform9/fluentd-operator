@@ -4,10 +4,10 @@ Logging operator provides Kubernetes native log management for developers and de
 * Configure logging using Kubernetes constructs. No need to learn log configurations.
 * Flexibility and Reuse through Kubernetes Custom Resource Definitions.
 * Handles logging service deployment and scaling.
-* Support for popular datastores like ElasticSearch and S3
+* Support for popular datastores like ElasticSearch, S3 and Loki.
 
 #### Concepts ####
-1. ***Output***: An output defines a datastore where logs are to be stored. Currently, the operator supports ElasticSearch and S3 as log stores.
+1. ***Output***: An output defines a datastore where logs are to be stored. Currently, the operator supports ElasticSearch, S3 and Loki as log stores.
 Outputs are defined at cluster scope -- all logs from containers in the cluster get routed to each output.
 
 #### Architecture ####
@@ -23,7 +23,9 @@ Simplest way to install is with bundled deploy script
 ```
 If you are curious, deploy.sh creates prerequesite namespaces and applies yaml manifests under deploy/ directory.
 #### Example Usage With Object Store ####
-This example shows how to forward logs to an object storage. We will be using S3.
+Samples for all the datastores are stored in examples directory.
+
+The below example shows how to forward logs to an object storage. We will be using S3.
 1. Deploy random logger as kubernetes deployment
 ```bash
 kubectl apply -f docs/getting-started/user-guides/random-logger.yaml
