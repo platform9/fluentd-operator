@@ -155,6 +155,14 @@ func (o *Output) getLokiParams() (map[string]string, error) {
 		params[name] = v
 	}
 
+	mandatoryParams := []string{"url", "extra_labels"}
+
+	for _, mp := range mandatoryParams {
+		if _, ok := params[mp]; !ok {
+			return map[string]string{}, fmt.Errorf("Mandatory Loki parameter %s is missing", mp)
+		}
+	}
+
 	return params, nil
 }
 
