@@ -141,6 +141,74 @@ func TestEsRender(t *testing.T) {
 
 }
 
+func TestLokiParams(t *testing.T) {
+	obj := v1alpha1.Output{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake",
+			Namespace: "fake",
+		},
+		Spec: v1alpha1.OutputSpec{
+			Type: "loki",
+			Params: []v1alpha1.Param{
+				v1alpha1.Param{
+					Name:  "url",
+					Value: "fake-url",
+				},
+				v1alpha1.Param{
+					Name:  "extra_labels",
+					Value: "fake-labels",
+				},
+			},
+		},
+	}
+
+	o := NewOutput(fake.NewFakeClient(), &obj)
+
+	assert.NotNil(t, o)
+
+	params, err := o.getLokiParams()
+
+	assert.Nil(t, err)
+
+	keys := []string{"url", "extra_labels"}
+
+	for _, k := range keys {
+		_, ok := params[k]
+		assert.True(t, ok)
+	}
+}
+
+func TestLokiRender(t *testing.T) {
+	obj := v1alpha1.Output{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake",
+			Namespace: "fake",
+		},
+		Spec: v1alpha1.OutputSpec{
+			Type: "loki",
+			Params: []v1alpha1.Param{
+				v1alpha1.Param{
+					Name:  "url",
+					Value: "fake-url",
+				},
+				v1alpha1.Param{
+					Name:  "extra_labels",
+					Value: "fake-labels",
+				},
+			},
+		},
+	}
+
+	o := NewOutput(fake.NewFakeClient(), &obj)
+
+	assert.NotNil(t, o)
+
+	_, err := o.Render()
+
+	assert.Nil(t, err)
+
+}
+
 func TestS3Params(t *testing.T) {
 	obj := v1alpha1.Output{
 		ObjectMeta: metav1.ObjectMeta{
