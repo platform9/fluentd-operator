@@ -15,7 +15,7 @@ LDFLAGS := -s -w -extldflags '-static'
 SRCFILES := $(shell find ./pkg)
 
 test:
-	go test ./pkg/...
+	go test ./...
 
 build/bin/fluentd-operator: test build/bin/fluentd-operator-$(GOOS)-$(GOARCH)
 	cp build/bin/fluentd-operator-$(GOOS)-$(GOARCH) build/bin/fluentd-operator
