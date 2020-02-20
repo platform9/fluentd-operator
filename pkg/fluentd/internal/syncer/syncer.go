@@ -49,13 +49,16 @@ var Labels = map[string]string{
 }
 
 type fdSyncer struct {
+	input runtime.Object
 }
 
 type fdCfgMapSyncer struct {
-	data []byte
+	data  []byte
+	input runtime.Object
 }
 
 type fdSvcSyncer struct {
+	input runtime.Object
 }
 
 func getLabels() labels.Set {
@@ -71,7 +74,7 @@ func NewFluentdSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interface 
 		},
 	}
 
-	sync := &fdSyncer{}
+	sync := &fdSyncer{obj}
 
 	return syncer.NewObjectSyncer("Deployment", nil, obj, c, scheme, sync.SyncFn)
 }
@@ -85,7 +88,9 @@ func NewFluentdCfgMapSyncer(c client.Client, scheme *runtime.Scheme, params ...[
 		},
 	}
 
-	sync := &fdCfgMapSyncer{}
+	sync := &fdCfgMapSyncer{
+		input: obj,
+	}
 
 	if len(params) > 0 {
 		sync.data = params[0]
@@ -118,14 +123,14 @@ func NewFluentdSvcSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interfa
 		},
 	}
 
-	sync := &fdSvcSyncer{}
+	sync := &fdSvcSyncer{obj}
 
 	return syncer.NewObjectSyncer("Service", nil, obj, c, scheme, sync.SyncFn)
 }
 
 // SyncFn sync the Fluentd service per spec
-func (s *fdSvcSyncer) SyncFn(in runtime.Object) error {
-	out := in.(*corev1.Service)
+func (s *fdSvcSyncer) SyncFn() error {
+	out := s.input.(*corev1.Service)
 	if len(out.ObjectMeta.Labels) == 0 {
 		out.ObjectMeta.Labels = map[string]string{}
 	}
@@ -142,8 +147,8 @@ func (s *fdSvcSyncer) SyncFn(in runtime.Object) error {
 }
 
 // SyncFn syncs the Fluentd config map per spec
-func (s *fdCfgMapSyncer) SyncFn(in runtime.Object) error {
-	out := in.(*corev1.ConfigMap)
+func (s *fdCfgMapSyncer) SyncFn() error {
+	out := s.input.(*corev1.ConfigMap)
 	if len(out.ObjectMeta.Labels) == 0 {
 		out.ObjectMeta.Labels = map[string]string{}
 	}
@@ -168,14 +173,14 @@ func (s *fdCfgMapSyncer) SyncFn(in runtime.Object) error {
 }
 
 // SyncFn syncs the Fluentd cluster object with operator spec
-func (s *fdSyncer) SyncFn(in runtime.Object) error {
+func (s *fdSyncer) SyncFn() error {
 	annotations := map[string]string{
 		"prometheus.io/scrape": "true",
 		"prometheus.io/port":   "2020",
 		"prometheus.io/path":   "/api/v1/metrics/prometheus",
 	}
 
-	out := in.(*appsv1.Deployment)
+	out := s.input.(*appsv1.Deployment)
 
 	var replicas int32 = 1
 	out.ObjectMeta.Labels = Labels

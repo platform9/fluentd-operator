@@ -48,9 +48,11 @@ var volumePaths = map[string]string{
 }
 
 type fbSyncer struct {
+	input runtime.Object
 }
 
 type fbCfgMapSyncer struct {
+	input runtime.Object
 }
 
 // NewFluentbitSyncer returns a sync interface compliant implementation for fluentbit
@@ -62,7 +64,7 @@ func NewFluentbitSyncer(c client.Client, scheme *runtime.Scheme) syncer.Interfac
 		},
 	}
 
-	sync := &fbSyncer{}
+	sync := &fbSyncer{obj}
 
 	return syncer.NewObjectSyncer("DaemonSet", nil, obj, c, scheme, sync.SyncFn)
 }
@@ -76,14 +78,14 @@ func NewFluentbitCfgMapSyncer(c client.Client, scheme *runtime.Scheme) syncer.In
 		},
 	}
 
-	sync := &fbCfgMapSyncer{}
+	sync := &fbCfgMapSyncer{obj}
 
 	return syncer.NewObjectSyncer("ConfigMap", nil, obj, c, scheme, sync.SyncFn)
 }
 
 // SyncFn syncs the Fluentbit config map per spec
-func (s *fbCfgMapSyncer) SyncFn(in runtime.Object) error {
-	out := in.(*corev1.ConfigMap)
+func (s *fbCfgMapSyncer) SyncFn() error {
+	out := s.input.(*corev1.ConfigMap)
 	out.ObjectMeta.Labels = Labels
 	if len(out.Data) == 0 {
 		if d, err := utils.GetCfgMapData("fluent-bit"); err != nil {
@@ -100,14 +102,14 @@ func getLabels() labels.Set {
 }
 
 // SyncFn syncs the Fluentbit cluster object with operator spec
-func (s *fbSyncer) SyncFn(in runtime.Object) error {
+func (s *fbSyncer) SyncFn() error {
 	annotations := map[string]string{
 		"prometheus.io/scrape": "true",
 		"prometheus.io/port":   "2020",
 		"prometheus.io/path":   "/api/v1/metrics/prometheus",
 	}
 
-	out := in.(*appsv1.DaemonSet)
+	out := s.input.(*appsv1.DaemonSet)
 
 	if len(out.ObjectMeta.Labels) == 0 {
 		out.ObjectMeta.Labels = map[string]string{}

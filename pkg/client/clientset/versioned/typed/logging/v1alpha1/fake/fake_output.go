@@ -118,7 +118,7 @@ func (c *FakeOutputs) DeleteCollection(options *v1.DeleteOptions, listOptions v1
 // Patch applies the patch and returns the patched output.
 func (c *FakeOutputs) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Output, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(outputsResource, name, data, subresources...), &v1alpha1.Output{})
+		Invokes(testing.NewRootPatchSubresourceAction(outputsResource, name, pt, data, subresources...), &v1alpha1.Output{})
 	if obj == nil {
 		return nil, err
 	}
