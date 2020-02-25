@@ -37,15 +37,15 @@ func NewTestClient() client.Client {
 	return &TestClient{}
 }
 
-func (t *TestClient) Create(ctx context.Context, obj runtime.Object) error {
+func (t *TestClient) Create(ctx context.Context, obj runtime.Object, opts ...client.CreateOption) error {
 	return nil
 }
 
-func (t *TestClient) Update(ctx context.Context, obj runtime.Object) error {
+func (t *TestClient) Update(ctx context.Context, obj runtime.Object, opts ...client.UpdateOption) error {
 	return nil
 }
 
-func (t *TestClient) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error {
+func (t *TestClient) Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOption) error {
 	return nil
 }
 
@@ -53,7 +53,15 @@ func (t *TestClient) Get(ctx context.Context, key client.ObjectKey, obj runtime.
 	return nil
 }
 
-func (t *TestClient) List(ctx context.Context, opt *client.ListOptions, list runtime.Object) error {
+func (t *TestClient) DeleteAllOf(ctx context.Context, obj runtime.Object, opts ...client.DeleteAllOfOption) error {
+	return nil
+}
+
+func (t *TestClient) Patch(ctx context.Context, obj runtime.Object, patch client.Patch, opts ...client.PatchOption) error {
+	return nil
+}
+
+func (t *TestClient) List(ctx context.Context, list runtime.Object, opt ...client.ListOption) error {
 	decoder := scheme.Codecs.UniversalDecoder()
 	var objs runtime.Object
 	objs = &loggingv1alpha1.OutputList{

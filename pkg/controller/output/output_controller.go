@@ -115,7 +115,7 @@ func getFluentdConfig(cl client.Client) ([]byte, error) {
 	instances := &loggingv1alpha1.OutputList{}
 	lo := client.ListOptions{}
 
-	err := cl.List(context.TODO(), &lo, instances)
+	err := cl.List(context.TODO(), instances, &lo)
 
 	if err != nil {
 		return []byte{}, err

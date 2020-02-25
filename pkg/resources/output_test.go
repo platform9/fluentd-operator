@@ -46,8 +46,9 @@ func TestValueFrom(t *testing.T) {
 	assert.NotNil(t, o)
 
 	vf := v1alpha1.ValueFrom{
-		Name: "fake-secret",
-		Key:  "fake-key",
+		Name:      "fake-secret",
+		Namespace: "fake",
+		Key:       "fake-key",
 	}
 
 	val, err := o.getValueFrom(&vf)
@@ -105,15 +106,17 @@ func TestEsRender(t *testing.T) {
 				v1alpha1.Param{
 					Name: "user",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "user",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "user",
 					},
 				},
 				v1alpha1.Param{
 					Name: "password",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "password",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "password",
 					},
 				},
 			},
@@ -221,29 +224,33 @@ func TestS3Params(t *testing.T) {
 				v1alpha1.Param{
 					Name: "aws_key_id",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "aws_key_id",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "aws_key_id",
 					},
 				},
 				v1alpha1.Param{
 					Name: "aws_sec_key",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "aws_sec_key",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "aws_sec_key",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_bucket",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "s3_bucket",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "s3_bucket",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_region",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "s3_region",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "s3_region",
 					},
 				},
 			},
@@ -291,29 +298,33 @@ func TestS3Render(t *testing.T) {
 				v1alpha1.Param{
 					Name: "aws_key_id",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "aws_key_id",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "aws_key_id",
 					},
 				},
 				v1alpha1.Param{
 					Name: "aws_sec_key",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "aws_sec_key",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "aws_sec_key",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_bucket",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "s3_bucket",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "s3_bucket",
 					},
 				},
 				v1alpha1.Param{
 					Name: "s3_region",
 					ValueFrom: v1alpha1.ValueFrom{
-						Name: "fake-secret",
-						Key:  "s3_region",
+						Name:      "fake-secret",
+						Namespace: "fake",
+						Key:       "s3_region",
 					},
 				},
 			},

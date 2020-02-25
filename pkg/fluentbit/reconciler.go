@@ -49,7 +49,7 @@ func New(mgr manager.Manager) *Reconciler {
 	return &Reconciler{
 		client:   mgr.GetClient(),
 		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetRecorder("controller.fluentbit"),
+		recorder: mgr.GetEventRecorderFor("controller.fluentbit"),
 	}
 }
 

@@ -15,26 +15,26 @@ LDFLAGS := -s -w -extldflags '-static'
 SRCFILES := $(shell find ./pkg)
 
 test:
-	go test ./pkg/...
+	go test ./...
 
 build/bin/fluentd-operator: test build/bin/fluentd-operator-$(GOOS)-$(GOARCH)
 	cp build/bin/fluentd-operator-$(GOOS)-$(GOARCH) build/bin/fluentd-operator
 
 build/bin/fluentd-operator-darwin-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -a -o build/bin/fluentd-operator-darwin-amd64 cmd/manager/main.go
+	GOARCH=amd64 CGO_ENABLED=0 GOOS=darwin go build --installsuffix cgo -a -o build/bin/fluentd-operator-darwin-amd64 cmd/manager/main.go
 
 build/bin/fluentd-operator-linux-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=linux go build --installsuffix cgo -a -o build/bin/fluentd-operator-linux-amd64 cmd/manager/main.go
+	GOARCH=amd64 CGO_ENABLED=0 GOOS=linux go build --installsuffix cgo -a -o build/bin/fluentd-operator-linux-amd64 cmd/manager/main.go
 
 
 build/bin/fluentd-operator-helper:  build/bin/fluentd-operator-helper-$(GOOS)-$(GOARCH)
 	cp build/bin/fluentd-operator-helper-$(GOOS)-$(GOARCH) build/bin/fluentd-operator-helper
 
 build/bin/fluentd-operator-helper-darwin-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -a -o build/bin/fluentd-operator-helper-darwin-amd64 cmd/helper/helper.go
+	GOARCH=amd64 CGO_ENABLED=0 GOOS=darwin go build --installsuffix cgo -a -o build/bin/fluentd-operator-helper-darwin-amd64 cmd/helper/helper.go
 
 build/bin/fluentd-operator-helper-linux-amd64: $(SRCFILES)
-	GOARCH=amd64 GOOS=linux go build --installsuffix cgo -a -o build/bin/fluentd-operator-helper-linux-amd64 cmd/helper/helper.go
+	GOARCH=amd64 CGO_ENABLED=0 GOOS=linux go build --installsuffix cgo -a -o build/bin/fluentd-operator-helper-linux-amd64 cmd/helper/helper.go
 
 
 
@@ -47,7 +47,7 @@ binary: build/bin/fluentd-operator
 
 .PHONY: image
 image: test build/bin/fluentd-operator-linux-amd64
-	docker build -t $(DOCKER_IMAGE_NAME) .
+	docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
 
 .PHONY: helper
 helper: build/bin/fluentd-operator-helper
