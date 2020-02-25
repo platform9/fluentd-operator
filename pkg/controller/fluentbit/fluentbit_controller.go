@@ -49,11 +49,6 @@ func add(mgr manager.Manager, r *fluentbit.Reconciler) error {
 		return err
 	}
 
-	if err := r.CreateIfNeeded(); err != nil {
-		log.Error(err, "Error creating fluent-bit")
-		return err
-	}
-
 	if err := c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		log.Error(err, "Error adding watch")
 		return err

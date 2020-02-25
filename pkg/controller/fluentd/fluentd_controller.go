@@ -50,11 +50,6 @@ func add(mgr manager.Manager, r *fluentd.Reconciler) error {
 		return err
 	}
 
-	if err := r.CreateIfNeeded(); err != nil {
-		log.Error(err, "Error creating fluentd")
-		return err
-	}
-
 	if err := c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		log.Error(err, "Error adding watch")
 		return err
