@@ -16,10 +16,8 @@ package output
 import (
 	"context"
 	"encoding/json"
-	"testing"
 
 	loggingv1alpha1 "github.com/platform9/fluentd-operator/pkg/apis/logging/v1alpha1"
-	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -98,12 +96,4 @@ func (t *TestClient) List(ctx context.Context, list runtime.Object, opt ...clien
 
 func (t *TestClient) Status() client.StatusWriter {
 	return t.sw
-}
-
-func TestFluentdConfig(t *testing.T) {
-	cl := NewTestClient()
-	buf, err := getFluentdConfig(cl)
-	t.Log(err)
-	assert.Nil(t, err)
-	assert.NotEmpty(t, buf)
 }
