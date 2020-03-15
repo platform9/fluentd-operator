@@ -6,7 +6,7 @@ spec:
   type: elasticsearch
   params:
     - name: url
-      value: http://elasticsearch.es-logging.svc.cluster.local:9200 
+      value: http://elasticsearch.logging.svc.cluster.local:9200 
     - name: user
       value: test-elastic
     - name: password
