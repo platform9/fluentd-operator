@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"time"
 
 	loggingv1alpha1 "github.com/platform9/fluentd-operator/pkg/apis/logging/v1alpha1"
 	logclient "github.com/platform9/fluentd-operator/pkg/client/clientset/versioned"
@@ -27,13 +28,17 @@ var mode string
 var logLevel string
 var dataNs string
 var dataSrc string
+var dataStore string
+var timeout int
 
 const (
-	defaultMode     = "standalone"
-	defaultLogLevel = "INFO"
-	defaultDataNs   = "pf9-operators"
-	defaultDataSrc  = "pf9-log"
-	defaultObjNs    = "logging"
+	defaultMode      = "k8s"
+	defaultLogLevel  = "INFO"
+	defaultDataNs    = "pf9-operators"
+	defaultDataSrc   = "pf9-log"
+	defaultObjNs     = "logging"
+	defaultDataStore = "elasticsearch"
+	defaultTimeout   = 10
 )
 
 var (
@@ -43,6 +48,14 @@ var (
 		Resource: "outputs",
 	}
 )
+
+// esParams stores elasticsearch data
+type esParams struct {
+	Name       string
+	Namespace  string
+	Deployment string
+	Port       uint16
+}
 
 // Main starts it all
 func Main() int {
@@ -55,7 +68,7 @@ func Main() int {
 	apiClient, err := apixv1beta1client.NewForConfig(config)
 	errExit("Failed to create client", err)
 
-	checkCRDExists(apiClient)
+	waitForCRDs(apiClient)
 	log.Print("Found output CRD")
 
 	cs, err := kubernetes.NewForConfig(config)
@@ -64,6 +77,9 @@ func Main() int {
 	log.Print("Creating logging operator client")
 	lc, err := logclient.NewForConfig(config)
 	errExit("Failed to create logging operator client", err)
+
+	log.Print("Configuring default backend datastore")
+	configureDataStore(cs.CoreV1(), lc)
 
 	log.Print("Creating Output CRs")
 	createCrs(cs.CoreV1(), lc)
@@ -104,11 +120,43 @@ func getByKubeCfg() (*rest.Config, error) {
 	return clientcmd.BuildConfigFromFlags("", defaultKubeCfg)
 }
 
-func checkCRDExists(apixClient apixv1beta1client.ApiextensionsV1beta1Interface) {
-	_, err := apixClient.CustomResourceDefinitions().Get("outputs.logging.pf9.io", metav1.GetOptions{})
+func waitForCRDs(apixClient apixv1beta1client.ApiextensionsV1beta1Interface) {
+	timeoutDuration := time.After(time.Duration(timeout) * time.Minute)
+	tickDuration := time.Tick(10 * time.Second)
 
-	errExit("Error while querying output CRD", err)
+	for {
+		select {
+		case <-timeoutDuration:
+			errExit("waiting for CRD's", fmt.Errorf("Timed out waiting for CRD's to come up"))
+			return
+		case <-tickDuration:
+			_, err := apixClient.CustomResourceDefinitions().Get("outputs.logging.pf9.io", metav1.GetOptions{})
+			if err == nil {
+				return
+			}
+		}
+	}
+}
 
+func configureDataStore(coreClient corev1.CoreV1Interface, lc logclient.LoggingV1alpha1Interface) {
+	object := &loggingv1alpha1.Output{}
+
+	// Check default datastore to use and set values
+	if dataStore == "elasticsearch" {
+		// Creating Output object for elastic search
+		params := &esParams{
+			Name:       "es-objstore",
+			Namespace:  dataNs,
+			Deployment: "elasticsearch",
+			Port:       9200,
+		}
+		object = params.getESOutputObject()
+	}
+
+	_, err := lc.LoggingV1alpha1().Outputs().Create(object)
+	if err != nil {
+		errExit("while creating default Output object", err)
+	}
 }
 
 func createCrs(coreClient corev1.CoreV1Interface, lc logclient.LoggingV1alpha1Interface) {
@@ -148,6 +196,25 @@ func errExit(msg string, err error) {
 	}
 }
 
+func (p *esParams) getESOutputObject() *loggingv1alpha1.Output {
+	url := fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", p.Deployment, p.Namespace, p.Port)
+	return &loggingv1alpha1.Output{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      p.Name,
+			Namespace: p.Namespace,
+		},
+		Spec: loggingv1alpha1.OutputSpec{
+			Type: "elasticsearch",
+			Params: []loggingv1alpha1.Param{
+				{
+					Name:  "url",
+					Value: url,
+				},
+			},
+		},
+	}
+}
+
 func buildCmd() *cobra.Command {
 	cobra.OnInitialize(initCfg)
 	rootCmd := &cobra.Command{
@@ -162,6 +229,7 @@ func buildCmd() *cobra.Command {
 	pf := rootCmd.PersistentFlags()
 	pf.StringVar(&mode, "mode", defaultMode, "Operational mode: k8s or standalone")
 	viper.BindPFlag("mode", pf.Lookup("mode"))
+
 	pf.StringVar(&logLevel, "log-level", defaultLogLevel, "Log level: DEBUG, INFO, WARN or FATAL")
 	viper.BindPFlag("log-level", pf.Lookup("log-level"))
 
@@ -170,6 +238,12 @@ func buildCmd() *cobra.Command {
 
 	pf.StringVar(&dataSrc, "datasource", defaultDataSrc, "Name of secret for user config data")
 	viper.BindPFlag("datasource", pf.Lookup("datasource"))
+
+	pf.StringVar(&dataStore, "datastore", defaultDataStore, "Name of the backend datastore")
+	viper.BindPFlag("datastore", pf.Lookup("datastore"))
+
+	pf.IntVar(&timeout, "timeout", defaultTimeout, "Wait period for the CRD's")
+	viper.BindPFlag("timeout", pf.Lookup("timeout"))
 
 	return rootCmd
 }
