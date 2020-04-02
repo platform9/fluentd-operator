@@ -41,10 +41,7 @@ func newReconciler(mgr manager.Manager) *fluentbit.Reconciler {
 // add adds a new Controller to mgr
 func add(mgr manager.Manager, r *fluentbit.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("fluentbit-controller", mgr, controller.Options{
-		Reconciler: r,
-	})
-
+	c, err := controller.New("fluentbit-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
