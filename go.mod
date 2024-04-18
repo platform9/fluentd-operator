@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.53.0 // indirect
-	github.com/emicklei/go-restful v2.11.2+incompatible // indirect
+	github.com/emicklei/go-restful v2.16.0+incompatible // indirect
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/go-openapi/spec v0.19.6
